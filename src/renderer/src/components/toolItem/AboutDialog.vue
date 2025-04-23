@@ -9,8 +9,6 @@ const closeDialog = () => {
 
 <template>
   <div class="about-dialog">
-    <h3>关于</h3>
-    
     <p>Live2D桌面宠物</p>
     <p>版本: 1.0.0</p>
     <p>作者: ZH</p>

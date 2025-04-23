@@ -3,6 +3,8 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { loadConfig, saveConfig, updateWindowConfig } from '../renderer/src/utils/config'
+import fs from 'fs'
+import path from 'path'
 
 function createWindow(): void {
   // 加载配置
@@ -40,6 +42,7 @@ function createWindow(): void {
     const [x, y] = mainWindow.getPosition()
     const [width, height] = mainWindow.getSize()
     updateWindowConfig({ width, height, x, y })
+
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -133,6 +136,65 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+  ipcMain.handle('exit-app', () => {
+    app.quit();
+  });
+  
+  // 添加获取模型文件夹的IPC处理程序
+  ipcMain.handle('get-model-folders', () => {
+    try {
+      const modelsPath = path.join(__dirname, '../../src/public/live2d/model');
+      const folders = fs.readdirSync(modelsPath).filter(file => {
+        return fs.statSync(path.join(modelsPath, file)).isDirectory();
+      });
+      return folders;
+    } catch (error) {
+      console.error('获取模型文件夹失败:', error);
+      return [];
+    }
+  });
+
+  // 添加获取模型文件的IPC处理程序
+ipcMain.handle('get-model-files', (_, folderName) => {
+  try {
+    const modelFolderPath = path.join(__dirname, '../../src/public/live2d/model',folderName);
+    
+    // 递归查找文件夹中的所有model3.json文件
+    const findModel3Files = (dir, fileList = []) => {
+      const files = fs.readdirSync(dir);
+      for (const file of files) {
+        const filePath = path.join(dir, file);
+        const stat = fs.statSync(filePath);
+        
+        if (stat.isDirectory()) {
+          findModel3Files(filePath, fileList);
+        } else if (file.includes('model3.json')) {
+          // 获取相对于模型文件夹的路径
+          const relativePath = path.relative(modelFolderPath, filePath);
+          fileList.push(relativePath.replace(/\\/g, '/'));
+        }
+      }
+      
+      return fileList;
+    };
+    
+    return findModel3Files(modelFolderPath);
+  } catch (error) {
+    console.error('获取模型文件失败:', error);
+    return [];
+  }
+});
+  
+  // 添加保存配置的IPC处理程序
+  ipcMain.handle('save-config', (_, newConfig) => {
+    try {
+      saveConfig(newConfig);
+      return true;
+    } catch (error) {
+      console.error('保存配置失败:', error);
+      return false;
+    }
+  });
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -142,9 +204,6 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
-
-
-    
     ipcMain.on('save-config', (_, newConfig) => {
       saveConfig(newConfig)
     })

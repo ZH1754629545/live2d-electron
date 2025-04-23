@@ -1,15 +1,15 @@
 {
   "window": {
-    "width": 342,
+    "width": 434,
     "height": 666,
-    "x": 1270,
-    "y": 314,
+    "x": 1172,
+    "y": 298,
     "alwaysOnTop": false,
     "transparent": true,
     "frame": false
   },
   "model": {
-    "path": "玛丽偶像_vts/玛丽公开模型.model3.json",
+    "path": "Haru/Haru.model3.json",
     "scale": 0.5,
     "position": {
       "x": 0,

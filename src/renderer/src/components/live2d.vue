@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount,watch } from 'vue';
 import * as PIXI from 'pixi.js';
 import { Live2DModel } from 'pixi-live2d-display/cubism4';
 window.PIXI=PIXI;//为了pixi-live2d-display内部调用
@@ -10,7 +10,7 @@ let model
 
 // 获取store实例
 const store = useAppStore();
-onMounted(async() => {
+const loadLive2DModel=async()=>{
   app = new PIXI.Application({
     view: liveCanvas.value,
     resizeTo: window,
@@ -48,6 +48,7 @@ onMounted(async() => {
   const modelPath = encodeURI('/'+config.model.path)
   console.log('模型路径',getPublicPath+decodeURI(modelPath))
   // 加载Live2D模型
+  console.log(getPublicPath+decodeURI(modelPath))
   model=await Live2DModel.from(getPublicPath+decodeURI(modelPath));
   // model=await Live2DModel.from("https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json");
 
@@ -62,33 +63,10 @@ onMounted(async() => {
   model.scale.set(0.11);
   // 初始调用一次以确保正确位置
   resizeHandler();
-  
-  // 检查动作管理器
-  if (model.internalModel && model.internalModel.motionManager) {
-    console.log('动作管理器:', model.internalModel.motionManager);
-    console.log('可用动作组:', model.internalModel.motionManager.definitions);
-    
-    // 遍历所有动作组
-    const motionGroups = model.internalModel.motionManager.definitions;
-    console.log('动作列表:');
-    for (const groupName in motionGroups) {
-      console.log(`动作组: ${groupName}`);
-      const motions = motionGroups[groupName];
-      motions.forEach((motion, index) => {
-        console.log(`  动作 ${index}: ${motion.file || '未命名'}`);
-      });
-    }
-    
-    // 获取所有动作组名称
-    const groupNames = Object.keys(motionGroups);
-    console.log('所有动作组名称:', groupNames);
-  } else {
-    console.log('未找到动作管理器或动作定义');
-  }
-
   // 检查鼠标悬停 更新工具栏显示状态
-    // 添加鼠标进入模型区域的监听
-    model.on('mouseover', () => {
+  // 添加鼠标进入模型区域的监听
+
+  model.on('rightclick', () => {
     store.updateToolbar({ visible: true });
   });
   
@@ -103,8 +81,18 @@ onMounted(async() => {
     model?.destroy();
     app?.destroy();
   });
+}
+onMounted(async() => {
+  // 加载模型
+  await loadLive2DModel()
 })
-
+watch(() => store.live2d.reload, (newValue) => {
+  if (newValue) {
+    loadLive2DModel();
+    // 重置reload状态
+    store.updateLive2d({ reload: false });
+  }
+});
 // 使模型可拖拽
 function makeDraggable(model) {
   model.on('pointerdown', (e) => {

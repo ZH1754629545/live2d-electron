@@ -10,16 +10,19 @@ const dialogTitle = ref('');
 
 // 示例工具项列表，增加组件路径
 const toolItems = [
+
+  // { id: 2, name: '换装', icon: 'style', component: 'DressupDialog' },
+  // { id: 3, name: '表情', icon: 'face', component: 'ExpressionDialog' },
+  // { id: 4, name: '动作', icon: 'directions_run', component: 'MotionDialog' },
+  // { id: 5, name: '截图', icon: 'photo_camera', component: 'ScreenshotDialog' },
+  // { id: 6, name: '音量', icon: 'volume_up', component: 'VolumeDialog' },
+  // { id: 7, name: '背景', icon: 'image', component: 'BackgroundDialog' },
+  // { id: 8, name: '置顶', icon: 'vertical_align_top', component: 'TopMostDialog' },
+  // { id: 9, name: '锁定', icon: 'lock', component: 'LockDialog' },
   { id: 1, name: '设置', icon: 'settings', component: 'SettingsDialog' },
-  { id: 2, name: '换装', icon: 'style', component: 'DressupDialog' },
-  { id: 3, name: '表情', icon: 'face', component: 'ExpressionDialog' },
-  { id: 4, name: '动作', icon: 'directions_run', component: 'MotionDialog' },
-  { id: 5, name: '截图', icon: 'photo_camera', component: 'ScreenshotDialog' },
-  { id: 6, name: '音量', icon: 'volume_up', component: 'VolumeDialog' },
-  { id: 7, name: '背景', icon: 'image', component: 'BackgroundDialog' },
-  { id: 8, name: '置顶', icon: 'vertical_align_top', component: 'TopMostDialog' },
-  { id: 9, name: '锁定', icon: 'lock', component: 'LockDialog' },
-  { id: 10, name: '关于', icon: 'info', component: 'AboutDialog' }
+  { id: 2, name: '模型', icon: 'person', component: 'ModelDialog' },
+  { id: 10, name: '关于', icon: 'info', component: 'AboutDialog' },
+  { id:11 ,name:'退出',icon:"logout",component:'ExitDialog'}
 ];
 
 // 动态导入组件
@@ -34,6 +37,8 @@ const componentMap = {
   // TopMostDialog: () => import('./dialogs/TopMostDialog.vue'),
   // LockDialog: () => import('./dialogs/LockDialog.vue'),
   AboutDialog: defineAsyncComponent(() => import('./toolItem/AboutDialog.vue')),
+  ExitDialog: defineAsyncComponent(() => import('./toolItem/ExitDialog.vue')),
+  ModelDialog: defineAsyncComponent(() => import('./toolItem/ModelDialog.vue')),
 };
 
 // 打开弹窗方法

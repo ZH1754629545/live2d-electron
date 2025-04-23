@@ -7,8 +7,9 @@ let messageTimer: NodeJS.Timeout | null = null
 export const useAppStore = defineStore('app', () => {
   // 当前live2d信息
   const live2d = ref({
-    name: "血小板",
-    path: "live2d/血小板/血小板.model.json",
+    name: "",
+    path: "",
+    reload: false,
     voices: []
   })
 
