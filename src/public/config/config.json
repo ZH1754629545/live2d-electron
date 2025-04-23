@@ -1,0 +1,24 @@
+{
+  "window": {
+    "width": 342,
+    "height": 666,
+    "x": 1270,
+    "y": 314,
+    "alwaysOnTop": false,
+    "transparent": true,
+    "frame": false
+  },
+  "model": {
+    "path": "玛丽偶像_vts/玛丽公开模型.model3.json",
+    "scale": 0.5,
+    "position": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "behavior": {
+    "followMouse": true,
+    "autoHide": false,
+    "autoHideDelay": 5000
+  }
+}
