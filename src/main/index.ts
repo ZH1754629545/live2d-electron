@@ -195,6 +195,29 @@ ipcMain.handle('get-model-files', (_, folderName) => {
       return false;
     }
   });
+
+// 添加更新窗口设置的IPC处理程序
+  ipcMain.handle('update-window-settings', (_, settings) => {
+    try {
+      const mainWindow = BrowserWindow.getFocusedWindow();
+      if (mainWindow) {
+        // 更新窗口设置
+        mainWindow.setAlwaysOnTop(settings.alwaysOnTop);
+        
+        // 更新配置
+        const config = loadConfig();
+        config.window.alwaysOnTop = settings.alwaysOnTop;
+        saveConfig(config);
+        
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('更新窗口设置失败:', error);
+      return false;
+    }
+  });
+
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common

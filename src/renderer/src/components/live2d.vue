@@ -60,7 +60,7 @@ const loadLive2DModel=async()=>{
   }
   app.stage.addChild(model);
   model.anchor.set(0.5); // 设置锚点居中
-  model.scale.set(0.11);
+  model.scale.set(config.model.scale); // 设置模型缩放比例
   // 初始调用一次以确保正确位置
   resizeHandler();
   // 检查鼠标悬停 更新工具栏显示状态
@@ -86,11 +86,32 @@ onMounted(async() => {
   // 加载模型
   await loadLive2DModel()
 })
+//监听是否切换模型
 watch(() => store.live2d.reload, (newValue) => {
   if (newValue) {
     loadLive2DModel();
     // 重置reload状态
     store.updateLive2d({ reload: false });
+  }
+});
+//监听模型缩放
+watch(() => store.live2d.scale, (newScale) => {
+  if (model && newScale) {
+    model.scale.set(newScale);
+  }
+});
+//监听模型拖拽
+watch(() => store.live2d.draggable, (newValue) => {
+  if (model) {
+    if (newValue) {
+      makeDraggable(model);
+    } else {
+      // 禁用拖动
+      model.off('pointerdown');
+      model.off('pointermove');
+      model.off('pointerupoutside');
+      model.off('pointerup');
+    }
   }
 });
 // 使模型可拖拽

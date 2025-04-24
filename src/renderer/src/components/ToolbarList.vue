@@ -27,7 +27,7 @@ const toolItems = [
 
 // 动态导入组件
 const componentMap = {
-  // SettingsDialog: () => import('./dialogs/SettingsDialog.vue'),
+  SettingsDialog: defineAsyncComponent(() => import('./toolItem/SettingsDialog.vue')),
   // DressupDialog: () => import('./dialogs/DressupDialog.vue'),
   // ExpressionDialog: () => import('./dialogs/ExpressionDialog.vue'),
   // MotionDialog: () => import('./dialogs/MotionDialog.vue'),
@@ -45,6 +45,7 @@ const componentMap = {
 const openDialog = (item) => {
   dialogTitle.value = item.name;
   currentComponent.value = componentMap[item.component];
+  console.log(currentComponent.value)
   showDialog.value = true;
 };
 

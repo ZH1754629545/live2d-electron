@@ -10,6 +10,8 @@ export const useAppStore = defineStore('app', () => {
     name: "",
     path: "",
     reload: false,
+    scale: 0.11,
+    draggable: false,
     voices: []
   })
 
@@ -26,6 +28,7 @@ export const useAppStore = defineStore('app', () => {
     scale: 1,
     showBorder: false,
     autoStart: false,
+    alwaysOnTop: false,
     systemVolume: 1.0
   })
 

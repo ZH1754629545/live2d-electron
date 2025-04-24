@@ -1,20 +1,21 @@
 {
   "window": {
-    "width": 434,
-    "height": 666,
-    "x": 1172,
-    "y": 298,
+    "width": 358,
+    "height": 690,
+    "x": 1238,
+    "y": 242,
     "alwaysOnTop": false,
     "transparent": true,
     "frame": false
   },
   "model": {
-    "path": "Haru/Haru.model3.json",
-    "scale": 0.5,
+    "path": "玛丽偶像_vts/玛丽公开模型.model3.json",
+    "scale": 0.12,
     "position": {
       "x": 0,
       "y": 0
-    }
+    },
+    "draggable": false
   },
   "behavior": {
     "followMouse": true,
