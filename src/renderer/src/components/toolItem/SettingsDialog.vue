@@ -11,6 +11,7 @@ const settings = ref({
   scale: 0.11, // 默认缩放比例
   draggable: false, // 是否可拖动
   alwaysOnTop: false, // 是否置顶
+  roundedCorners:false// 圆角(边框显示)
 });
 
 // 获取当前配置
@@ -24,6 +25,7 @@ const getSettings = async () => {
       scale: config.model.scale || 0.11,
       draggable: config.model.draggable || false,
       alwaysOnTop: config.window.alwaysOnTop || false,
+      roundedCorners:config.window.roundedCorners||false,
     };
   } catch (error) {
     console.error('获取设置失败:', error);
@@ -37,11 +39,12 @@ const saveSettings = async () => {
   try {
     loading.value = true;
     const config = await window.electron.ipcRenderer.invoke('get-config');
-    
+    let winConfigChange = (config.window.alwaysOnTop===settings.value.alwaysOnTop&&config.window.roundedCorners===settings.value.roundedCorners)?false:true;
     // 更新配置
     config.model.scale = settings.value.scale;
     config.model.draggable = settings.value.draggable;
     config.window.alwaysOnTop = settings.value.alwaysOnTop;
+    config.window.roundedCorners=settings.value.roundedCorners;
     await window.electron.ipcRenderer.invoke('save-config', config);
     
     // 通知应用更新设置
@@ -51,9 +54,14 @@ const saveSettings = async () => {
     });
     
     // 更新窗口设置
-    await window.electron.ipcRenderer.invoke('update-window-settings', {
-      alwaysOnTop: settings.value.alwaysOnTop
-    });
+    if(winConfigChange)
+    {
+      await window.electron.ipcRenderer.invoke('update-window-settings', {
+      alwaysOnTop: settings.value.alwaysOnTop,
+      roundedCorners:settings.value.roundedCorners,
+      });
+    }
+
     
     // 关闭对话框
     emit('close');
@@ -128,6 +136,13 @@ onMounted(() => {
         <q-toggle
           v-model="settings.alwaysOnTop"
           label="窗口置顶"
+          color="primary"
+        />
+      </div>
+      <div class="q-mb-md">
+        <q-toggle
+          v-model="settings.roundedCorners"
+          label="窗口边框"
           color="primary"
         />
       </div>

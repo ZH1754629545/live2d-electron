@@ -2,11 +2,12 @@
   "window": {
     "width": 390,
     "height": 714,
-    "x": 1312,
-    "y": 366,
-    "alwaysOnTop": false,
+    "x": 1240,
+    "y": 306,
+    "alwaysOnTop": true,
     "transparent": true,
-    "frame": false
+    "frame": false,
+    "roundedCorners": false
   },
   "model": {
     "path": "玛丽偶像_vts/玛丽公开模型.model3.json",

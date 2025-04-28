@@ -11,6 +11,7 @@ export interface WindowConfig {
   transparent?: boolean
   frame?: boolean
   alwaysOnTop?: boolean
+  roundedCorners?:boolean
 }
 
 export interface ModelConfig {

@@ -22,8 +22,7 @@ function createWindow(): void {
     height: windowConfig.height,
     alwaysOnTop: windowConfig.alwaysOnTop,
     show: false,
-    roundedCorners:false,
-    thickFrame:false,
+    roundedCorners:windowConfig.roundedCorners,
     // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       webSecurity: false,
@@ -203,14 +202,9 @@ ipcMain.handle('get-model-files', (_, folderName) => {
     try {
       const mainWindow = BrowserWindow.getFocusedWindow();
       if (mainWindow) {
-        // 更新窗口设置
-        mainWindow.setAlwaysOnTop(settings.alwaysOnTop);
-        
-        // 更新配置
-        const config = loadConfig();
-        config.window.alwaysOnTop = settings.alwaysOnTop;
-        saveConfig(config);
-        
+        // 重启窗口
+        mainWindow.close();
+        createWindow();
         return true;
       }
       return false;
