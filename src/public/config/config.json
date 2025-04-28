@@ -1,16 +1,16 @@
 {
   "window": {
-    "width": 358,
-    "height": 690,
-    "x": 1238,
-    "y": 242,
+    "width": 390,
+    "height": 714,
+    "x": 1312,
+    "y": 366,
     "alwaysOnTop": false,
     "transparent": true,
     "frame": false
   },
   "model": {
     "path": "玛丽偶像_vts/玛丽公开模型.model3.json",
-    "scale": 0.12,
+    "scale": 0.11,
     "position": {
       "x": 0,
       "y": 0

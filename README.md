@@ -1,6 +1,7 @@
 # live2d
 
-An Electron application with Vue and TypeScript
+An Electron application with Vue and TypeScript 
+基于Electron,node.js,vue3,vite,quasar,快速开发的桌面应用
 
 ## Recommended IDE Setup
 
@@ -32,3 +33,38 @@ $ pnpm build:mac
 # For Linux
 $ pnpm build:linux
 ```
+
+
+
+## 目前已有功能
+
+通过引入live2d模型将模型显示在窗口上。
+工具栏功能：
+	设置：包括模型缩放，模型拽动，窗口置顶。
+	模型：切换src/public/live2d/model下的模型
+
+​    待办：增删改待办。筛选和排序。
+​    
+
+## TODO
+
+#### 系统模块
+
+- [ ] 设置功能新增显示窗口边框
+- [ ] 
+
+#### 待办模块
+
+- [ ] 任务筛选和排序需要保存config。
+
+- [ ] 修改待办时间逻辑分为开始时间和截至时间。可以全部填写也可以任选一个或者都不选。
+
+- [ ] 在列表上显示。的时间如果是今天那么就是今天加时间 
+
+  今天 HH:MM-HH:MM 。如果是明天就是明天加时间。目前仅支持今天明天和后天。如果超过三天则用日期表示如5月1日。超过一年就用年份来表示如2026年5月1日
+
+- [ ] 时间排序逻辑修改。分为开始时间排序和截至时间排序。
+
+- [ ] 超过截至时间的数据自动放到已完成列表。
+
+- [ ] 添加一个每日任务功能。如果添加的待办属性包含设置成为每日任务那么这个任务会每日刷新

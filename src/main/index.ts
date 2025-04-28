@@ -3,6 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { loadConfig, saveConfig, updateWindowConfig } from '../renderer/src/utils/config'
+import { getTodos ,saveTodos} from '../renderer/src/utils/todo'
 import fs from 'fs'
 import path from 'path'
 
@@ -15,14 +16,15 @@ function createWindow(): void {
     transparent: windowConfig.transparent,
     frame: windowConfig.frame,
     resizable: true,
-    movable: true,
-    hasShadow: true, // 添加窗口阴影
+    hasShadow: false, // 禁用窗口阴影
+    backgroundColor: '#00000000', // 设置完全透明的背景色
     width: windowConfig.width,
     height: windowConfig.height,
     alwaysOnTop: windowConfig.alwaysOnTop,
     show: false,
-    autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    roundedCorners:false,
+    thickFrame:false,
+    // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       webSecurity: false,
       preload: join(__dirname, '../preload/index.js'),
@@ -217,6 +219,16 @@ ipcMain.handle('get-model-files', (_, folderName) => {
       return false;
     }
   });
+
+  //获取todo信息
+  ipcMain.handle('get-todos', () => {
+    
+    return getTodos();
+  })
+  //保存todo
+  ipcMain.handle('save-todos', async(_, todos) => {
+    return saveTodos(todos);
+  })
 
 })
 

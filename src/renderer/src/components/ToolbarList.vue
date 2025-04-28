@@ -21,6 +21,7 @@ const toolItems = [
   // { id: 9, name: '锁定', icon: 'lock', component: 'LockDialog' },
   { id: 1, name: '设置', icon: 'settings', component: 'SettingsDialog' },
   { id: 2, name: '模型', icon: 'person', component: 'ModelDialog' },
+  { id: 3, name: '待办', icon: 'task', component: 'TodoDialog' },
   { id: 10, name: '关于', icon: 'info', component: 'AboutDialog' },
   { id:11 ,name:'退出',icon:"logout",component:'ExitDialog'}
 ];
@@ -39,6 +40,7 @@ const componentMap = {
   AboutDialog: defineAsyncComponent(() => import('./toolItem/AboutDialog.vue')),
   ExitDialog: defineAsyncComponent(() => import('./toolItem/ExitDialog.vue')),
   ModelDialog: defineAsyncComponent(() => import('./toolItem/ModelDialog.vue')),
+  TodoDialog: defineAsyncComponent(() => import('./toolItem/TodoDialog.vue')),
 };
 
 // 打开弹窗方法
