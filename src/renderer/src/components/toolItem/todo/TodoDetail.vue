@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+
 
 const props = defineProps({
   todo: {
@@ -11,11 +12,54 @@ const props = defineProps({
 const emit = defineEmits(['close', 'update', 'delete']);
 
 const editedTodo = ref({...props.todo});
+onMounted(() => {
+  editedTodo.value = {...props.todo};
+  if(editedTodo.value.startTime==null||editedTodo.value.startTime==""){
+    const currentDate = new Date();
+    // 使用ISO格式的日期时间字符串，确保与q-date和q-time兼容
+    editedTodo.value.startTime = formatDateTime(currentDate);
+  } else {
+    // 确保现有的startTime格式正确
+    try {
+      const dateStart = new Date(editedTodo.value.startTime);
+      editedTodo.value.startTime = formatDateTime(dateStart);
+    } catch (e) {
+      console.error('起始日期格式转换错误', e);
+    }
+  }
+  if(editedTodo.value.dueTime==null||editedTodo.value.dueTime==""){
+    const currentDate = new Date();
+    currentDate.setDate(currentDate.getDate() + 1); // 假设默认截止日期为明天，你可以根据需要进行调整
+    console.log(currentDate);
+    // 使用ISO格式的日期时间字符串，确保与q-date和q-time兼容
+    editedTodo.value.dueTime = formatDateTime(currentDate);
+  } else {
+    // 确保现有的startTime格式正确
+    try {
+      const dateStart = new Date(editedTodo.value.dueTime);
+      editedTodo.value.dueTime = formatDateTime(dateStart);
+    } catch (e) {
+      console.error('截止日期格式转换错误', e);
+    }
+  }
+});
+
+// 格式化日期时间为YYYY-MM-DD HH:mm格式
+function formatDateTime(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
+}
 const showDeleteConfirm = ref(false);
 const showDialog = ref(true); // 添加对话框控制变量
 
 // 保存修改
 const saveTodo = () => {
+  console.log(editedTodo.value);
   emit('update', {...editedTodo.value});
 };
 
@@ -70,17 +114,69 @@ const cancelDelete = () => {
             :disable="editedTodo.completed"
           />
         </div>
+        <div class="q-mb-md">
+          <q-input 
+            v-model="editedTodo.startTime" 
+            label="开始时间" 
+            outlined 
+            :disable="editedTodo.completed"
+          >
+            <template v-slot:prepend>
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-date v-model="editedTodo.startTime" mask="YYYY-MM-DD HH:mm" today-btn>
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="关闭" color="primary" flat />
+                    </div>
+                  </q-date>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+            <template v-slot:append>
+              <q-icon name="access_time" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-time v-model="editedTodo.startTime" mask="YYYY-MM-DD HH:mm" format24h>
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Close" color="primary" flat />
+                    </div>
+                  </q-time>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+        </div>
         
         <div class="q-mb-md">
           <q-input 
             v-model="editedTodo.dueTime" 
             label="截止日期" 
-            type="date" 
             outlined 
             :disable="editedTodo.completed"
-          />
-        </div>
-        
+          >
+            <template v-slot:prepend>
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-date v-model="editedTodo.dueTime" mask="YYYY-MM-DD HH:mm" today-btn>
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="关闭" color="primary" flat />
+                    </div>
+                  </q-date>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+            <template v-slot:append>
+              <q-icon name="access_time" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-time v-model="editedTodo.dueTime" mask="YYYY-MM-DD HH:mm" format24h>
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Close" color="primary" flat />
+                    </div>
+                  </q-time>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+        </div>        
         <div class="q-mb-md">
           <div class="row items-center">
             <div class="col-4">重要度:</div>
@@ -135,3 +231,8 @@ const cancelDelete = () => {
     </q-card>
   </q-dialog>
 </template>
+<style scoped>
+::-webkit-scrollbar{
+  display: none;
+}
+</style>

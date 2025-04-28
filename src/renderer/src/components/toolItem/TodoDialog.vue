@@ -57,11 +57,12 @@ const saveTodos = async () => {
 const addTodo = () => {
   const newTodo = {
     id: Date.now(),
-    title: '新待办事项',
+    title: '',
     content: '',
     completed: false,
-    dueTime: new Date().toISOString().split('T')[0],
-    createTime: new Date().toISOString(),
+    startTime:'',
+    dueTime: '',
+    createTime: new Date().toLocaleString(),
     importance: 1
   };
   
