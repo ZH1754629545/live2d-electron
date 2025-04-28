@@ -19,7 +19,18 @@ const sort = ref('createTime'); // 默认按创建时间排序
 const loadTodos = async () => {
   try {
     const todoData = await window.electron.ipcRenderer.invoke('get-todos');
-    todos.value = todoData || [];
+    if(todoData)
+    {
+        // 新格式，包含待办事项和设置
+        todos.value = todoData.todoItems || [];
+        if (todoData.settings) {
+          filter.value = todoData.settings.filter || filter.value;
+          sort.value = todoData.settings.sort || sort.value;
+        }
+    }else{
+      todos.value = [];
+    }
+    // todos.value = todoData || [];
   } catch (error) {
     console.error('获取待办事项失败:', error);
   }
@@ -28,7 +39,15 @@ const loadTodos = async () => {
 // 保存待办事项
 const saveTodos = async () => {
   try {
-    await window.electron.ipcRenderer.invoke('save-todos',  JSON.parse(JSON.stringify(todos.value)));
+        // 创建包含待办事项和设置的数据结构
+      const todoData = {
+      todoItems: JSON.parse(JSON.stringify(todos.value)),
+      settings: {
+        filter: filter.value,
+        sort: sort.value
+      }
+    };
+    await window.electron.ipcRenderer.invoke('save-todos', JSON.parse(JSON.stringify(todoData)));
   } catch (error) {
     console.error('保存待办事项失败:', error);
   }
@@ -101,6 +120,7 @@ const applySettings = (newFilter, newSort) => {
   filter.value = newFilter;
   sort.value = newSort;
   showSettings.value = false;
+  saveTodos();
 };
 
 // 关闭对话框
