@@ -27,6 +27,15 @@ const loadTodos = async () => {
           filter.value = todoData.settings.filter || filter.value;
           sort.value = todoData.settings.sort || sort.value;
         }
+        //如果是今天第一次打开，更新日常为未完成
+        const today = new Date();
+        const lastUpdateTime = new Date(todoData.updateTime);
+        if(today.toLocaleDateString() !== lastUpdateTime.toLocaleDateString()){
+          todos.value.forEach(todo => {
+            if(todo.isDaily) todo.completed = false;
+          });
+          saveTodos();
+        }
     }else{
       todos.value = [];
     }
@@ -45,7 +54,8 @@ const saveTodos = async () => {
       settings: {
         filter: filter.value,
         sort: sort.value
-      }
+      },
+      updateTime : new Date().toLocaleString()
     };
     await window.electron.ipcRenderer.invoke('save-todos', JSON.parse(JSON.stringify(todoData)));
   } catch (error) {
@@ -128,14 +138,22 @@ const applySettings = (newFilter, newSort) => {
 const closeDialog = () => {
   emit('close');
 };
-
+const changeHHMMToDate = (time:string)=>{
+  if(time.length>10) return time;
+  const [hour, minute] = time.split(':');
+  const date = new Date();
+  date.setHours(parseInt(hour, 10));
+  date.setMinutes(parseInt(minute, 10));
+  return date.toLocaleString();
+} 
 // 获取筛选和排序后的待办事项
 const filteredAndSortedTodos = computed(() => {
   let result = [...todos.value];
   // 应用筛选
   if (filter.value.dates && filter.value.dates.length > 0) {
     result = result.filter(todo => {
-      // 如果没有设置开始时间或截止时间，则跳过该条件
+      // 如果没有设置开始时间或截止时间，则跳过该条件或者是每日任务
+      if(todo.isDaily) return true;
       if (!todo.startTime && !todo.dueTime) return true;
       
       // 将待办事项的开始时间和截止时间转换为Date对象
@@ -172,9 +190,9 @@ const filteredAndSortedTodos = computed(() => {
   } else if (sort.value === 'importance') {
     result.sort((a, b) => b.importance - a.importance);
   } else if (sort.value === 'dueTime') {
-    result.sort((a, b) => new Date(a.dueTime) - new Date(b.dueTime));
+    result.sort((a, b) => new Date(changeHHMMToDate(a.dueTime)) - new Date(changeHHMMToDate(b.dueTime)));
   }else if(sort.value === 'startTime'){
-    result.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+    result.sort((a, b) => new Date(changeHHMMToDate(a.startTime)) - new Date(changeHHMMToDate(b.startTime)));
   }
   
   return result;

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed ,watch} from 'vue';
 import { useQuasar } from 'quasar';
+
 const props = defineProps({
   todo: {
     type: Object,
@@ -11,13 +12,12 @@ const props = defineProps({
 const emit = defineEmits(['close', 'update', 'delete']);
 
 const editedTodo = ref({...props.todo});
-onMounted(() => {
-  editedTodo.value = {...props.todo};
-  if(editedTodo.value.startTime==null||editedTodo.value.startTime==""){
+const changeTime=()=>{
+  if(editedTodo.value.startTime==null||editedTodo.value.startTime==""||(editedTodo.value.startTime.length<10&&!editedTodo.value.isDaily)){
     const currentDate = new Date();
     // 使用ISO格式的日期时间字符串，确保与q-date和q-time兼容
     editedTodo.value.startTime = formatDateTime(currentDate);
-  } else {
+  } else if(!editedTodo.value.isDaily){
     // 确保现有的startTime格式正确
     try {
       const dateStart = new Date(editedTodo.value.startTime);
@@ -26,13 +26,13 @@ onMounted(() => {
       console.error('起始日期格式转换错误', e);
     }
   }
-  if(editedTodo.value.dueTime==null||editedTodo.value.dueTime==""){
+  if(editedTodo.value.dueTime==null||editedTodo.value.dueTime==""||(editedTodo.value.dueTime.length<10&&!editedTodo.value.isDaily)){
     const currentDate = new Date();
     currentDate.setDate(currentDate.getDate() + 1); // 假设默认截止日期为明天，你可以根据需要进行调整
     console.log(currentDate);
     // 使用ISO格式的日期时间字符串，确保与q-date和q-time兼容
     editedTodo.value.dueTime = formatDateTime(currentDate);
-  } else {
+  } else if(!editedTodo.value.isDaily){
     // 确保现有的startTime格式正确
     try {
       const dateStart = new Date(editedTodo.value.dueTime);
@@ -41,6 +41,10 @@ onMounted(() => {
       console.error('截止日期格式转换错误', e);
     }
   }
+}
+onMounted(() => {
+  editedTodo.value = {...props.todo};
+  changeTime();
 });
 
 // 格式化日期时间为YYYY-MM-DD HH:mm格式
@@ -71,7 +75,20 @@ const saveTodo = () => {
   }
   emit('update', {...editedTodo.value});
 };
-
+//是每日任务需要修改一血
+watch(() => editedTodo.value.isDaily,
+  (newVal) => {
+    if (newVal) {
+      // 每日任务只保留时间部分
+      const now = new Date();
+      const hhmm = now.toTimeString().slice(0, 5);
+      editedTodo.value.startTime = hhmm;
+      editedTodo.value.dueTime = '23:59';
+    } else {
+      changeTime();
+    }
+  }
+)
 // 删除待办事项
 const deleteTodo = () => {
   emit('delete', props.todo);
@@ -132,21 +149,22 @@ const cancelDelete = () => {
             outlined 
             :disable="editedTodo.completed"
           >
-            <template v-slot:prepend>
+            <template v-slot:prepend v-if="!editedTodo.isDaily">
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="editedTodo.startTime" mask="YYYY-MM-DD HH:mm" today-btn>
+                  <q-date v-model="editedTodo.startTime" mask="YYYY-MM-DD HH:mm" today-btn >
                     <div class="row items-center justify-end">
                       <q-btn v-close-popup label="关闭" color="primary" flat />
                     </div>
                   </q-date>
+
                 </q-popup-proxy>
               </q-icon>
             </template>
             <template v-slot:append>
               <q-icon name="access_time" class="cursor-pointer">
                 <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-time v-model="editedTodo.startTime" mask="YYYY-MM-DD HH:mm" format24h>
+                  <q-time v-model="editedTodo.startTime" :mask="editedTodo.isDaily?'HH:mm':'YYYY-MM-DD HH:mm'" format24h now-btn>
                     <div class="row items-center justify-end">
                       <q-btn v-close-popup label="关闭" color="primary" flat />
                     </div>
@@ -164,7 +182,7 @@ const cancelDelete = () => {
             outlined 
             :disable="editedTodo.completed"
           >
-            <template v-slot:prepend>
+            <template v-slot:prepend  v-if="!editedTodo.isDaily">
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                   <q-date v-model="editedTodo.dueTime" mask="YYYY-MM-DD HH:mm" today-btn>
@@ -178,7 +196,7 @@ const cancelDelete = () => {
             <template v-slot:append>
               <q-icon name="access_time" class="cursor-pointer">
                 <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-time v-model="editedTodo.dueTime" mask="YYYY-MM-DD HH:mm" format24h>
+                  <q-time v-model="editedTodo.dueTime" :mask="editedTodo.isDaily?'HH:mm':'YYYY-MM-DD HH:mm'" format24h now-btn>
                     <div class="row items-center justify-end">
                       <q-btn v-close-popup label="关闭" color="primary" flat />
                     </div>
@@ -211,7 +229,12 @@ const cancelDelete = () => {
             disable 
           />
         </div>
-        
+        <div class="q-mb-md">
+      <q-checkbox 
+        v-model="editedTodo.isDaily" 
+        label="每日任务" 
+      />
+      </div>
         <div class="q-mb-md">
           <div>创建时间: {{ new Date(editedTodo.createTime).toLocaleString() }}</div>
         </div>

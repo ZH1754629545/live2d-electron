@@ -10,6 +10,15 @@ const props = defineProps({
 
 const emit = defineEmits(['complete', 'delete', 'open-detail']);
 
+// 格式化时间
+const changeHHMMToDate = (time:string)=>{
+  if(time.length>10) return time;
+  const [hour, minute] = time.split(':');
+  const date = new Date();
+  date.setHours(parseInt(hour, 10));
+  date.setMinutes(parseInt(minute, 10));
+  return date.toLocaleString();
+} 
 // 分离已完成和未完成的待办事项，同时检查是否过期
 const forceUpdate = ref(0);
 const incompleteTodos = computed(() => {
@@ -18,7 +27,7 @@ const incompleteTodos = computed(() => {
   return props.todos.filter(todo => {
     if (!todo.completed) {
       // 检查是否过期
-      if (todo.dueTime && new Date(todo.dueTime) < now) {
+      if (todo.dueTime && new Date(changeHHMMToDate(todo.dueTime)) < now) {
 
         // 如果过期，自动标记为完成
         completeTodo(todo);
@@ -62,19 +71,21 @@ const toggleIncomplete = () => {
 const toggleCompleted = () => {
   showCompleted.value = !showCompleted.value;
 };
+
 const dataShow=(data)=>{
+  if(data.isDaily) return '每日任务' +data.startTime;
   const startTime = new Date(data.startTime);
   const today = new Date();
   if(startTime.toLocaleDateString()===today.toLocaleDateString()){
-    return '今天' + startTime.toLocaleTimeString();
+    return '今天' + startTime.toLocaleTimeString().slice(0,5);
   }
   today.setDate(today.getDate() +1);
   if(startTime.toLocaleDateString()===today.toLocaleDateString()){
-    return '明天' + startTime.toLocaleTimeString();
+    return '明天' + startTime.toLocaleTimeString().slice(0,5);
   }
   today.setDate(today.getDate() +1);
   if(startTime.toLocaleDateString()===today.toLocaleDateString()){
-    return '后天' + startTime.toLocaleTimeString(); 
+    return '后天' + startTime.toLocaleTimeString().slice(0,5); 
   }
   return startTime.toLocaleDateString();
 }
