@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted,onBeforeUnmount } from 'vue';
 
 const props = defineProps({
   todos: {
@@ -10,9 +10,25 @@ const props = defineProps({
 
 const emit = defineEmits(['complete', 'delete', 'open-detail']);
 
-// 分离已完成和未完成的待办事项
+// 分离已完成和未完成的待办事项，同时检查是否过期
+const forceUpdate = ref(0);
 const incompleteTodos = computed(() => {
-  return props.todos.filter(todo => !todo.completed);
+  forceUpdate.value;
+  const now = new Date();
+  return props.todos.filter(todo => {
+    if (!todo.completed) {
+      // 检查是否过期
+      if (todo.dueTime && new Date(todo.dueTime) < now) {
+
+        // 如果过期，自动标记为完成
+        completeTodo(todo);
+
+        return false; // 不显示在未完成列表中
+      }
+      return true;
+    }
+    return false;
+  });
 });
 
 const completedTodos = computed(() => {
@@ -46,6 +62,39 @@ const toggleIncomplete = () => {
 const toggleCompleted = () => {
   showCompleted.value = !showCompleted.value;
 };
+const dataShow=(data)=>{
+  const startTime = new Date(data.startTime);
+  const today = new Date();
+  if(startTime.toLocaleDateString()===today.toLocaleDateString()){
+    return '今天' + startTime.toLocaleTimeString();
+  }
+  today.setDate(today.getDate() +1);
+  if(startTime.toLocaleDateString()===today.toLocaleDateString()){
+    return '明天' + startTime.toLocaleTimeString();
+  }
+  today.setDate(today.getDate() +1);
+  if(startTime.toLocaleDateString()===today.toLocaleDateString()){
+    return '后天' + startTime.toLocaleTimeString(); 
+  }
+  return startTime.toLocaleDateString();
+}
+// 定时检查过期的待办事项
+let checkInterval;
+
+onMounted(() => {
+  // 每分钟检查一次是否有过期的待办事项
+  checkInterval = setInterval(() => {
+    // 触发computed重新计算
+    forceUpdate.value++;
+  }, 60000);
+});
+
+// 组件卸载时清除定时器
+onBeforeUnmount (() => {
+  if (checkInterval) {
+    clearInterval(checkInterval);
+  }
+});
 </script>
 
 <template>
@@ -72,7 +121,7 @@ const toggleCompleted = () => {
             <div class="todo-content">
               <div class="todo-title">{{ todo.title }}</div>
               <div class="todo-info">
-                <span class="todo-date">{{ new Date(todo.dueTime).toLocaleDateString() }}</span>
+                <span class="todo-date">{{ dataShow(todo) }}</span>
                 <span class="todo-importance">重要度: {{ todo.importance }}</span>
               </div>
             </div>
@@ -119,7 +168,7 @@ const toggleCompleted = () => {
             <div class="todo-content">
               <div class="todo-title">{{ todo.title }}</div>
               <div class="todo-info">
-                <span class="todo-date">{{ new Date(todo.dueTime).toLocaleDateString() }}</span>
+                <span class="todo-date">{{ dataShow(todo) }}</span>
                 <span class="todo-importance">重要度: {{ todo.importance }}</span>
               </div>
             </div>

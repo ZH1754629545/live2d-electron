@@ -5,7 +5,7 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 
 // 引入Quasar
-import { Quasar } from 'quasar'
+import { Quasar,Notify } from 'quasar'
 
 // 引入Quasar CSS
 import 'quasar/src/css/index.sass'
@@ -18,7 +18,7 @@ const app = createApp(App)
 
 // 使用Quasar
 app.use(Quasar, {
-  plugins: {}, // import Quasar plugins and add here
+  plugins: {Notify}, // import Quasar plugins and add here
   lang: quasarLang,
 })
 

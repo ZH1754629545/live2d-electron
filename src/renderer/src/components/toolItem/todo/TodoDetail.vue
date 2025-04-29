@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-
-
+import { useQuasar } from 'quasar';
 const props = defineProps({
   todo: {
     type: Object,
@@ -56,10 +55,20 @@ function formatDateTime(date) {
 }
 const showDeleteConfirm = ref(false);
 const showDialog = ref(true); // 添加对话框控制变量
-
+const q = useQuasar();
 // 保存修改
 const saveTodo = () => {
   console.log(editedTodo.value);
+  if(editedTodo.value.title==null||editedTodo.value.title==""){
+    q.notify({
+      message: '标题不能为空',
+      color: 'red',
+      icon: 'warning',
+      position: 'top',
+      timeout: 1000,
+    });
+    return;
+  }
   emit('update', {...editedTodo.value});
 };
 
@@ -102,6 +111,8 @@ const cancelDelete = () => {
             label="标题" 
             outlined 
             :disable="editedTodo.completed"
+            :rules="[val =>val.length>0||'标题不能为空']"
+
           />
         </div>
         
@@ -137,7 +148,7 @@ const cancelDelete = () => {
                 <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                   <q-time v-model="editedTodo.startTime" mask="YYYY-MM-DD HH:mm" format24h>
                     <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
+                      <q-btn v-close-popup label="关闭" color="primary" flat />
                     </div>
                   </q-time>
                 </q-popup-proxy>
@@ -169,7 +180,7 @@ const cancelDelete = () => {
                 <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                   <q-time v-model="editedTodo.dueTime" mask="YYYY-MM-DD HH:mm" format24h>
                     <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
+                      <q-btn v-close-popup label="关闭" color="primary" flat />
                     </div>
                   </q-time>
                 </q-popup-proxy>

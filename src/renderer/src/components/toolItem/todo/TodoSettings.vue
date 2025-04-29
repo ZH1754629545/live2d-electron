@@ -106,7 +106,8 @@ const decreaseImportance = () => {
             :options="[
               { label: '按创建时间排序', value: 'createTime' },
               { label: '按重要度排序', value: 'importance' },
-              { label: '按截止时间排序', value: 'dueTime' }
+              { label: '按截止时间排序', value: 'dueTime' },
+              { label :'按开始时间排序', value: 'startTime'}
             ]"
             option-label="label"
             option-value="value"

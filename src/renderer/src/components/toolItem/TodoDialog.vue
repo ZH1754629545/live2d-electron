@@ -133,16 +133,36 @@ const closeDialog = () => {
 const filteredAndSortedTodos = computed(() => {
   let result = [...todos.value];
   // 应用筛选
-  if (filter.value.dates&&filter.value.dates.length > 0) {
+  if (filter.value.dates && filter.value.dates.length > 0) {
     result = result.filter(todo => {
-      const todoDate = todo.dueTime.replaceAll('-','/');
-      console.log(todoDate)
-      return filter.value.dates.includes(todoDate);
+      // 如果没有设置开始时间或截止时间，则跳过该条件
+      if (!todo.startTime && !todo.dueTime) return true;
+      
+      // 将待办事项的开始时间和截止时间转换为Date对象
+      const startDate = todo.startTime ? new Date(todo.startTime).toLocaleDateString() : null;
+      const dueDate = todo.dueTime ? new Date(todo.dueTime).toLocaleDateString() : null;
+      // 检查筛选日期是否在待办事项的时间范围内
+      return filter.value.dates.some(dateStr => {
+        const filterDate = new Date(dateStr).toLocaleDateString();
+        // 1. 如果有开始时间和截止时间，检查筛选日期是否在这个范围内
+        if (startDate && dueDate) {
+          return filterDate >= startDate && filterDate <= dueDate;
+        }
+        // 2. 如果只有开始时间，检查筛选日期是否在开始时间之后
+        else if (startDate && !dueDate) {
+          return filterDate >= startDate;
+        }
+        // 3. 如果只有截止时间，检查筛选日期是否在截止时间之前
+        else if (!startDate && dueDate) {
+          return filterDate <= dueDate;
+        }
+        
+        return false;
+      });
     });
-    console.log(filter.value.dates)
   }
   
-  if (filter.value.dates&&filter.value.importance > 0) {
+  if (filter.value.importance > 0) {
     result = result.filter(todo => todo.importance >= filter.value.importance);
   }
   
@@ -153,6 +173,8 @@ const filteredAndSortedTodos = computed(() => {
     result.sort((a, b) => b.importance - a.importance);
   } else if (sort.value === 'dueTime') {
     result.sort((a, b) => new Date(a.dueTime) - new Date(b.dueTime));
+  }else if(sort.value === 'startTime'){
+    result.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
   }
   
   return result;
