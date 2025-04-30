@@ -89,6 +89,37 @@ const dataShow=(data)=>{
   }
   return startTime.toLocaleDateString();
 }
+
+// 新增：根据距离截止时间动态设置背景色
+const getTodoBgColor = (todo) => {
+  // 只对未完成事项高亮
+  if (todo.completed) return {};
+  let due = todo.dueTime;
+  // 支持每日任务的HH:mm格式
+  if (due && due.length <= 5) {
+    const [hour, minute] = due.split(':');
+    const now = new Date();
+    due = new Date();
+    due.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
+    if (due < now) due.setDate(due.getDate() + 1); // 如果已过，算明天
+  } else {
+    due = new Date(due);
+  }
+  const now = new Date();
+  const diffMs = due - now;
+  const diffH = diffMs / (1000 * 60 * 60);
+
+  // 距离越近颜色越深
+  if (diffH <= 1) {
+    return { background: '#ff5252', color: '#fff' }; // 1小时内，红色
+  } else if (diffH <= 6) {
+    return { background: '#ff9800', color: '#fff' }; // 6小时内，橙色
+  } else if (diffH <= 24) {
+    return { background: '#ffd54f', color: '#333' }; // 24小时内，黄色
+  } else {
+    return { background: '#f5f5f5', color: '#333' }; // 默认
+  }
+}
 // 定时检查过期的待办事项
 let checkInterval;
 
@@ -127,6 +158,7 @@ onBeforeUnmount (() => {
             v-for="todo in incompleteTodos" 
             :key="todo.id" 
             class="todo-item"
+            :style="getTodoBgColor(todo)"
             @click="openDetail(todo)"
           >
             <div class="todo-content">
