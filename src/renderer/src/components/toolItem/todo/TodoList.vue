@@ -117,7 +117,7 @@ const getTodoBgColor = (todo) => {
   } else if (diffH <= 24) {
     return { background: '#ffd54f', color: '#333' }; // 24小时内，黄色
   } else {
-    return { background: '#f5f5f5', color: '#333' }; // 默认
+    return { background: '#68ed9b', color: '#333' }; // 默认
   }
 }
 // 定时检查过期的待办事项

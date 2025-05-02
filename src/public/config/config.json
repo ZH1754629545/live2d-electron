@@ -22,5 +22,17 @@
     "followMouse": true,
     "autoHide": false,
     "autoHideDelay": 5000
+  },
+  "messageBox": {
+    "width": 370,
+    "height": 100,
+    "bottom": 30,
+    "left": 20,
+    "opacity": 0.8,
+    "autoHide": false,
+    "autoHideDelay": 5000
+  },
+  "system": {
+    "lastStartDate": "Fri May 02 2025"
   }
 }
