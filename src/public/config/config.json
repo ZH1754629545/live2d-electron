@@ -1,9 +1,9 @@
 {
   "window": {
-    "width": 390,
-    "height": 714,
-    "x": 1158,
-    "y": 186,
+    "width": 426,
+    "height": 702,
+    "x": 1168,
+    "y": 128,
     "alwaysOnTop": false,
     "transparent": true,
     "frame": false,
@@ -24,15 +24,15 @@
     "autoHideDelay": 5000
   },
   "messageBox": {
-    "width": 370,
+    "width": 380,
     "height": 100,
-    "bottom": 30,
-    "left": 20,
+    "bottom": 40,
+    "left": 35,
     "opacity": 0.8,
-    "autoHide": false,
+    "autoHide": true,
     "autoHideDelay": 5000
   },
   "system": {
-    "lastStartDate": "Fri May 02 2025"
+    "lastStartDate": "Mon May 05 2025"
   }
 }

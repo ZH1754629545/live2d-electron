@@ -4,6 +4,7 @@ import * as PIXI from 'pixi.js';
 import { Live2DModel } from 'pixi-live2d-display/cubism4';
 window.PIXI=PIXI;//为了pixi-live2d-display内部调用
 import { useAppStore } from '../stores/appStore';
+import { showNextMessage } from '../services/messageService';
 const liveCanvas=ref( null);//创建变量绑定画布Let app; // 为了存储pixi实例Let model;// 为了存储live2d实例const displayText=ref(value:·');// 用于显示文本的变量
 let app
 let model
@@ -69,7 +70,9 @@ const loadLive2DModel=async()=>{
   model.on('rightclick', () => {
     store.updateToolbar({ visible: true });
   });
-  
+  model.on('click',()=>{
+    showNextMessage();
+  })
   // 添加拖拽功能
   // makeDraggable(model);
   

@@ -1,11 +1,22 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue';
 import { useQuasar } from 'quasar';
 import { useMessageState, hideMessage } from '../services/messageService';
 import { useConfigStore } from '../stores/configStore';
+import { checkFirstStartOfDay, fetchWeatherAndShow,startHitokotoTimer ,cleanupMessageService} from '../services/messageService';
 
 // 获取消息状态
 const { currentMessage, isVisible } = useMessageState();
+
+// 添加一个消息计数器，用于生成唯一的key
+const messageCounter = ref(0);
+
+// 监听消息变化，更新计数器
+watch(currentMessage, () => {
+  if (currentMessage.value) {
+    messageCounter.value++;
+  }
+});
 
 // 配置存储
 const configStore = useConfigStore();
@@ -23,6 +34,7 @@ const settings = ref({
   autoHideDelay: 5000
 });
 
+
 // 从配置文件加载设置
 onMounted(async () => {
   await configStore.loadConfig();
@@ -31,8 +43,16 @@ onMounted(async () => {
   if (configStore.config.messageBox) {
     settings.value = { ...settings.value, ...configStore.config.messageBox };
   }
+  //检查天气
+  const isFirstStart = await checkFirstStartOfDay();
+  if (isFirstStart) {
+    fetchWeatherAndShow();
+  }
+  startHitokotoTimer(1);
 });
-
+onBeforeUnmount(()=>{
+  cleanupMessageService();
+})
 // 计算样式
 const boxStyle = computed(() => {
   return {
@@ -88,7 +108,8 @@ async function saveSettings() {
         <q-btn flat round dense icon="settings" size="sm" @click="showSettings = true" />
       </div>
       <div class="message-content">
-        <div class="typing-animation">{{ currentMessage }}</div>
+        <!-- 添加:key属性，确保每次消息变化时重新渲染 -->
+        <div class="typing-animation" :key="messageCounter">{{ currentMessage }}</div>
       </div>
     </div>
   </transition>
@@ -201,7 +222,7 @@ async function saveSettings() {
   display: inline-block; /* 使元素宽度适应内容 */
   letter-spacing: 0.1em;
   animation: 
-    typing 3.5s steps(40, end),
+    typing 1.5s steps(40, end),
     blink-caret 0.75s step-end infinite;
 }
 
