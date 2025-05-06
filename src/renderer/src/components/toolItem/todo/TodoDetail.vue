@@ -75,7 +75,7 @@ const saveTodo = () => {
   }
   emit('update', {...editedTodo.value});
 };
-//是每日任务需要修改一血
+//是每日任务需要修改时间
 watch(() => editedTodo.value.isDaily,
   (newVal) => {
     if (newVal) {

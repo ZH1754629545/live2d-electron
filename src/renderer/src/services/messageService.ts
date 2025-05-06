@@ -1,7 +1,7 @@
 import { ref, readonly } from 'vue';
 import { useConfigStore } from '../stores/configStore';
+import { useTodoStore } from '../stores/todoStore';
 import axios from 'axios';
-import { time } from 'console';
 // 消息状态
 const currentMessage = ref('');
 const messageQueue = ref([]);
@@ -80,16 +80,15 @@ export const addMessage = (text: string, priority: MessagePriority = 'normal') =
 // 显示下一条消息
 export const showNextMessage = async() => {
     isVisible.value = true;
-
   if (messageQueue.value.length > 0) {
     const nextMessage = messageQueue.value.shift();
     currentMessage.value = nextMessage.text;
     isVisible.value = true;
-    
     // 自动隐藏
     autoHideMessage();
   } else {
-    fetchHitokotoAndShow();
+    await fetchHitokotoAndShow();
+    showNextMessage();
      //isVisible.value = false;
 
   }
@@ -272,7 +271,6 @@ export const fetchHitokotoAndShow = async () => {
   try {
     const response = await fetch('https://v1.hitokoto.cn/?c=a');
     const data = await response.json();
-    console.log(data)
     if (data && data.hitokoto) {
       // 添加一言消息，包含来源
       const message = data.from 
@@ -296,7 +294,7 @@ export const fetchHitokotoAndShow = async () => {
       }
     }catch(error){
       console.error('获取一言失败', error);
-      addMessage('what can I say', 'normal');
+      addMessage('what can I say?', 'normal');
     }
   }
 };
@@ -324,6 +322,70 @@ export const stopHitokotoTimer = () => {
   }
 };
 
+// 添加待办事项提醒相关变量
+let todoReminderTimer = null;
+const reminderSentIds = new Set(); // 用于记录已发送提醒的待办ID
+
+// 检查待办事项是否即将到期
+const checkTodoReminders = () => {
+  try {
+    const todoStore = useTodoStore();
+    console.log(todoStore.filteredAndSortedTodos)
+    const todos = todoStore.todos;
+    const now = new Date();
+    
+    todos.forEach(todo => {
+      // 只检查未完成的待办事项
+      if (!todo.completed && todo.dueTime) {
+        const dueDate = new Date(todoStore.changeHHMMToDate(todo.dueTime));
+        const diffMs = dueDate.getTime() - now.getTime();
+        const diffMinutes = diffMs / (1000 * 60);
+        
+        // 如果还有30分钟左右过期，发送提醒
+        if (diffMinutes > 0 && diffMinutes <= 30) {
+          // 使用待办ID作为唯一标识，避免重复提醒
+          const reminderKey = `todo_${todo.id}_30min`;
+          
+          if (!reminderSentIds.has(reminderKey)) {
+            addMessage(`待办事项"${todo.title}"即将在${parseInt(diffMinutes)}分钟后到期，请及时处理！`, 'high');
+            reminderSentIds.add(reminderKey);
+            showNextMessage();
+            // 24小时后清除提醒记录，允许再次提醒
+            setTimeout(() => {
+              reminderSentIds.delete(reminderKey);
+            }, 24 * 60 * 60 * 1000);
+            return
+          }
+        }
+      }
+    });
+  } catch (error) {
+    console.error('检查待办提醒失败:', error);
+  }
+};
+
+// 开始待办事项提醒检查
+export const startTodoReminderTimer = (defaultIntervalMinutes = 1) => {
+  // 先清除可能存在的定时器
+  stopTodoReminderTimer();
+  const intervalMin = defaultIntervalMinutes*60 * 1000; // 每defalutIntervalMinutes分钟检查一次
+  // 每分钟检查一次
+
+  todoReminderTimer = setInterval(()=>{
+    console.log("检查待办提醒")
+    checkTodoReminders();
+  },2000)
+  
+
+};
+
+// 停止待办事项提醒检查
+export const stopTodoReminderTimer = () => {
+  if (todoReminderTimer) {
+    clearInterval(todoReminderTimer);
+    todoReminderTimer = null;
+  }
+};
 // 清理资源
 export const cleanupMessageService = () => {
   stopHitokotoTimer();

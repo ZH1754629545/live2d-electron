@@ -29,10 +29,10 @@
     "bottom": 40,
     "left": 35,
     "opacity": 0.8,
-    "autoHide": true,
+    "autoHide": false,
     "autoHideDelay": 5000
   },
   "system": {
-    "lastStartDate": "Mon May 05 2025"
+    "lastStartDate": "Tue May 06 2025"
   }
 }
