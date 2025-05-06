@@ -374,7 +374,7 @@ export const startTodoReminderTimer = (defaultIntervalMinutes = 1) => {
   todoReminderTimer = setInterval(()=>{
     console.log("检查待办提醒")
     checkTodoReminders();
-  },2000)
+  },intervalMin)
   
 
 };
