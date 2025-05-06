@@ -4,6 +4,7 @@ import { useTodoStore } from '../stores/todoStore';
 import axios from 'axios';
 // 消息状态
 const currentMessage = ref('');
+const currentPriority = ref(5); // 添加当前消息的优先级信息
 const messageQueue = ref([]);
 const isVisible = ref(false);
 let hitokotoTimer = null; // 添加一言定时器变量
@@ -83,6 +84,7 @@ export const showNextMessage = async() => {
   if (messageQueue.value.length > 0) {
     const nextMessage = messageQueue.value.shift();
     currentMessage.value = nextMessage.text;
+    currentPriority.value = nextMessage.priority;
     isVisible.value = true;
     // 自动隐藏
     autoHideMessage();
@@ -109,7 +111,6 @@ const autoHideMessage = async () => {
 export const hideMessage = () => {
   isVisible.value = false;
   currentMessage.value = '';
-  
   // 检查队列中是否还有消息
   if (messageQueue.value.length > 0) {
     setTimeout(() => {
@@ -261,7 +262,8 @@ export const fetchWeatherAndShow = async () => {
 export const useMessageState = () => {
   return {
     currentMessage: readonly(currentMessage),
-    isVisible: readonly(isVisible)
+    isVisible: readonly(isVisible),
+    currentPriority: readonly(currentPriority),
   };
 };
 

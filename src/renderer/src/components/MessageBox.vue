@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue';
 import { useQuasar } from 'quasar';
-import { useMessageState, hideMessage } from '../services/messageService';
+import { useMessageState, hideMessage ,getCurrentStatus} from '../services/messageService';
 import { useConfigStore } from '../stores/configStore';
 import { checkFirstStartOfDay, fetchWeatherAndShow,startHitokotoTimer ,cleanupMessageService,startTodoReminderTimer} from '../services/messageService';
+import { get } from 'http';
 
 // 获取消息状态
-const { currentMessage, isVisible } = useMessageState();
+const { currentMessage, isVisible ,currentPriority} = useMessageState();
 
 // 添加一个消息计数器，用于生成唯一的key
 const messageCounter = ref(0);
@@ -104,6 +105,8 @@ async function saveSettings() {
 <template>
   <transition name="fade">
     <div v-if="isVisible" class="message-box" :style="boxStyle">
+      <!-- 添加高优先级红点指示器 -->
+      <div v-if="(currentPriority===10)" class="priority-indicator"></div>
       <div class="message-controls">
         <q-btn flat round dense icon="close" size="sm" @click="hideMessage" />
         <q-btn flat round dense icon="settings" size="sm" @click="showSettings = true" />
@@ -177,6 +180,36 @@ async function saveSettings() {
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
+}
+
+/* 添加高优先级指示器样式 */
+.priority-indicator {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: #ff5252; /* 红色 */
+  box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7);
+  }
+  
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(255, 82, 82, 0);
+  }
+  
+  100% {
+    transform: scale(0.8);
+    box-shadow: 0 0 0 0 rgba(255, 82, 82, 0);
+  }
 }
 
 .message-controls {
