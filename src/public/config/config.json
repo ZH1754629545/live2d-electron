@@ -2,15 +2,15 @@
   "window": {
     "width": 426,
     "height": 702,
-    "x": 1168,
-    "y": 128,
+    "x": 1232,
+    "y": 272,
     "alwaysOnTop": false,
     "transparent": true,
     "frame": false,
-    "roundedCorners": false
+    "roundedCorners": true
   },
   "model": {
-    "path": "玛丽偶像_vts/玛丽公开模型.model3.json",
+    "path": "chun/chun.model3.json",
     "scale": 0.11,
     "position": {
       "x": 0,
@@ -27,12 +27,12 @@
     "width": 380,
     "height": 100,
     "bottom": 40,
-    "left": 35,
+    "left": 30,
     "opacity": 0.8,
     "autoHide": false,
     "autoHideDelay": 5000
   },
   "system": {
-    "lastStartDate": "Tue May 06 2025"
+    "lastStartDate": "Wed May 07 2025"
   }
 }

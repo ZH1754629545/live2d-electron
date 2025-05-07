@@ -6,7 +6,8 @@ export const useTodoStore = defineStore('todo', () => {
   const todos = ref([]);
   const filter = ref({
     dates: [],
-    importance: 0
+    importance: 0,
+    dailyShowOnly: false,
   });
   const sort = ref('createTime');
   const lastChecked = ref(0);
@@ -70,8 +71,10 @@ export const useTodoStore = defineStore('todo', () => {
   const filteredAndSortedTodos = computed(() => {
     let result = [...todos.value];
     // 应用筛选
+    //日期筛选
     if (filter.value.dates && filter.value.dates.length > 0) {
       result = result.filter(todo => {
+        // 日常任务不需要时间筛选
         if (todo.isDaily) return true;
         if (!todo.startTime && !todo.dueTime) return true;
         
@@ -91,7 +94,10 @@ export const useTodoStore = defineStore('todo', () => {
         });
       });
     }
-    
+    //是否只显示每日任务筛选
+    if(filter.value.dailyShowOnly){
+      result = result.filter(todo => todo.isDaily);
+    }
     if (filter.value.importance > 0) {
       result = result.filter(todo => todo.importance >= filter.value.importance);
     }

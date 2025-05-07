@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted ,watch} from 'vue';
 import TodoList from './todo/TodoList.vue';
 import TodoDetail from './todo/TodoDetail.vue';
 import TodoSettings from './todo/TodoSettings.vue';
@@ -25,7 +25,6 @@ const addTodo = () => {
     createTime: new Date().toLocaleString(),
     importance: 1
   };
-  
   // 先打开详情编辑，不立即添加到列表
   currentTodo.value = newTodo;
 
@@ -67,10 +66,39 @@ onMounted(() => {
   // 确保数据是最新的
   todoStore.loadTodos();
 });
+
+// 监听 activeTab 的变化
+//TODO 以后加了每周任务等逻辑要改变
+
+const activeTab = ref(todoStore.filter.dailyShowOnly ? 'daily' : 'all');
+
+watch(activeTab, () => {
+  if(activeTab.value === 'daily') {
+    todoStore.filter.dailyShowOnly = true; 
+  }else{
+    todoStore.filter.dailyShowOnly = false;
+  }
+  todoStore.saveTodos();
+});
 </script>
 
 <template>
   <div class="todo-dialog">
+    <!-- 添加顶部导航栏 -->
+    <div class="todo-tabs">
+      <q-tabs
+        v-model="activeTab"
+        dense
+        class="text-primary"
+        active-color="primary"
+        indicator-color="primary"
+        align="justify"
+      >
+        <q-tab name="all" label="全部待办" />
+        <q-tab name="daily" label="每日任务" />
+      </q-tabs>
+    </div>
+    
     <TodoList 
       :todos="todoStore.filteredAndSortedTodos" 
       @complete="todoStore.completeTodo"
@@ -108,6 +136,14 @@ onMounted(() => {
   max-height: 500px;
   overflow-y: auto;
   position: relative;
+}
+
+/* 添加导航栏样式 */
+.todo-tabs {
+  margin-bottom: 15px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .todo-dialog::-webkit-scrollbar {

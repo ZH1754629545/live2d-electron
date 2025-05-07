@@ -26,7 +26,7 @@
       "id": 1745931429822,
       "title": "每日1",
       "content": "",
-      "completed": true,
+      "completed": false,
       "startTime": "20:57",
       "dueTime": "20:58",
       "createTime": "2025/4/29 20:57:09",
@@ -121,7 +121,7 @@
       "id": 1746499960028,
       "title": "测试",
       "content": "",
-      "completed": false,
+      "completed": true,
       "startTime": "2025-05-06 10:52",
       "dueTime": "2025-05-07 10:52",
       "createTime": "2025/5/6 10:52:40",
@@ -174,19 +174,70 @@
       "id": 1746503736462,
       "title": "测试超时2",
       "content": "",
-      "completed": false,
+      "completed": true,
       "startTime": "2025-05-06 11:55",
       "dueTime": "2025-05-06 12:09",
       "createTime": "2025/5/6 11:55:36",
+      "importance": 1
+    },
+    {
+      "id": 1746592009808,
+      "title": "非每日",
+      "content": "",
+      "completed": true,
+      "startTime": "2025-05-07 12:26",
+      "dueTime": "2025-05-08 12:26",
+      "createTime": "2025/5/7 12:26:49",
+      "importance": 1
+    },
+    {
+      "id": 1746592089631,
+      "title": "非每日",
+      "content": "",
+      "completed": true,
+      "startTime": "2025-05-07 12:28",
+      "dueTime": "2025-05-08 12:28",
+      "createTime": "2025/5/7 12:28:09",
+      "importance": 1
+    },
+    {
+      "id": 1746592139177,
+      "title": "非每日",
+      "content": "",
+      "completed": true,
+      "startTime": "2025-05-07 12:28",
+      "dueTime": "2025-05-08 12:28",
+      "createTime": "2025/5/7 12:28:59",
+      "importance": 1
+    },
+    {
+      "id": 1746592301351,
+      "title": "非每日",
+      "content": "",
+      "completed": false,
+      "startTime": "2025-05-07 12:31",
+      "dueTime": "2025-05-08 12:31",
+      "createTime": "2025/5/7 12:31:41",
+      "importance": 1
+    },
+    {
+      "id": 1746592340335,
+      "title": "非每日2",
+      "content": "",
+      "completed": false,
+      "startTime": "2025-05-07 12:32",
+      "dueTime": "2025-05-08 12:32",
+      "createTime": "2025/5/7 12:32:20",
       "importance": 1
     }
   ],
   "settings": {
     "filter": {
-      "dates": [],
-      "importance": 0
+      "dates": null,
+      "importance": 0,
+      "dailyShowOnly": false
     },
     "sort": "dueTime"
   },
-  "updateTime": "2025/5/6 11:56:14"
+  "updateTime": "2025/5/7 12:32:37"
 }
