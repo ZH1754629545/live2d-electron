@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, computed ,watch} from 'vue';
+import { ref, onMounted ,watch} from 'vue';
 import { useQuasar } from 'quasar';
-
-const props = defineProps({
-  todo: {
-    type: Object,
-    required: true
-  }
-});
+import { TodoType } from './Todo';
+const props = defineProps<{
+  todo: TodoType | null; // 允许 todo 为 null
+}>();
 
 const emit = defineEmits(['close', 'update', 'delete']);
 
@@ -236,7 +233,7 @@ const cancelDelete = () => {
       />
       </div>
         <div class="q-mb-md">
-          <div>创建时间: {{ new Date(editedTodo.createTime).toLocaleString() }}</div>
+          <div>创建时间: {{ editedTodo.createTime ? new Date(editedTodo.createTime).toLocaleString() : '-' }}</div>
         </div>
       </q-card-section>
 

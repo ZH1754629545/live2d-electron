@@ -4,11 +4,12 @@ import TodoList from './todo/TodoList.vue';
 import TodoDetail from './todo/TodoDetail.vue';
 import TodoSettings from './todo/TodoSettings.vue';
 import { useTodoStore } from '../../stores/todoStore';
+import { TodoType } from './todo/Todo';
 
 const emit = defineEmits(['close']);
 const showDetail = ref(false);
 const showSettings = ref(false);
-const currentTodo = ref(null);
+const currentTodo = ref<TodoType|null>(null);
 
 // 使用 todoStore
 const todoStore = useTodoStore();
@@ -51,9 +52,9 @@ const applySettings = (newFilter, newSort) => {
 };
 
 // 关闭对话框
-const closeDialog = () => {
-  emit('close');
-};
+// const closeDialog = () => {
+//   emit('close');
+// };
 
 // 更新待办事项
 const updateTodo = (newTodo) => {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref,watch } from 'vue';
 
 const props = defineProps({
   filter: {
@@ -47,6 +47,17 @@ const decreaseImportance = () => {
     currentFilter.value.importance--;
   }
 };
+// 添加一个字符串变量来存储日期
+const selectedDateString = ref(currentFilter.value.dates.join(', '));
+
+// 监听 currentFilter.dates 的变化，更新 selectedDateString
+watch(() => currentFilter.value.dates, (newDates) => {
+  if(newDates==null||newDates.length === 0){
+    selectedDateString.value = '';
+    return;
+  }
+  selectedDateString.value = newDates.join(', ');
+}, { deep: true });
 </script>
 
 <template>
@@ -66,7 +77,7 @@ const decreaseImportance = () => {
             <div class="col-4">日期筛选:</div>
             <div class="col-8">
               <q-input 
-                v-model="currentFilter.dates" 
+                v-model="selectedDateString" 
                 label="选择日期" 
                 outlined
               >

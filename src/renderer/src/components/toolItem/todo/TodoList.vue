@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, onMounted,onBeforeUnmount } from 'vue';
+import { TodoType } from './Todo';
 
-const props = defineProps({
-  todos: {
-    type: Array,
-    required: true
-  }
-});
+// 明确 todos 的类型为 Todo[]
+const props = defineProps<{
+  todos: TodoType[];
+}>();
 
 const emit = defineEmits(['complete', 'delete', 'open-detail']);
 
@@ -25,6 +24,7 @@ const incompleteTodos = computed(() => {
   forceUpdate.value;
   const now = new Date();
   return props.todos.filter(todo => {
+    if(todo==null) return false;
     if (!todo.completed) {
       // 检查是否过期
       if (todo.dueTime && new Date(changeHHMMToDate(todo.dueTime)) < now) {
@@ -106,7 +106,7 @@ const getTodoBgColor = (todo) => {
     due = new Date(due);
   }
   const now = new Date();
-  const diffMs = due - now;
+  const diffMs = due.getTime() - now.getTime();
   const diffH = diffMs / (1000 * 60 * 60);
 
   // 距离越近颜色越深

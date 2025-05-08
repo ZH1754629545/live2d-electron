@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 // 定时器
-let messageTimer: NodeJS.Timeout | null = null
+
 
 export const useAppStore = defineStore('app', () => {
   // 当前live2d信息

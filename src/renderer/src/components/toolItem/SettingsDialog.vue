@@ -91,6 +91,7 @@ const resetSettings = () => {
     scale: 0.11,
     draggable: false,
     alwaysOnTop: false,
+    roundedCorners:false,
   };
 };
 watch(()=>settings.value.scale,(newScale)=>{

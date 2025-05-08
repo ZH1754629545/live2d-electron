@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue';
 import { useQuasar } from 'quasar';
-import { useMessageState, hideMessage ,getCurrentStatus} from '../services/messageService';
+import { useMessageState, hideMessage} from '../services/messageService';
 import { useConfigStore } from '../stores/configStore';
 import { checkFirstStartOfDay, fetchWeatherAndShow,startHitokotoTimer ,cleanupMessageService,startTodoReminderTimer} from '../services/messageService';
-import { get } from 'http';
+
 
 // 获取消息状态
 const { currentMessage, isVisible ,currentPriority} = useMessageState();
@@ -41,8 +41,8 @@ onMounted(async () => {
   await configStore.loadConfig();
   
   // 加载消息框设置
-  if (configStore.config.messageBox) {
-    settings.value = { ...settings.value, ...configStore.config.messageBox };
+  if ((configStore.config as any).messageBox) {
+    settings.value = { ...settings.value, ...(configStore.config as any).messageBox };
   }
   //检查天气
   const isFirstStart = await checkFirstStartOfDay();

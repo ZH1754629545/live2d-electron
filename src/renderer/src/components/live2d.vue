@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount,watch } from 'vue';
 import * as PIXI from 'pixi.js';
+// @ts-ignore
 import { Live2DModel } from 'pixi-live2d-display/cubism4';
+// 声明全局PIXI
+declare global {
+  interface Window {
+    PIXI: typeof PIXI;
+  }
+}
 window.PIXI=PIXI;//为了pixi-live2d-display内部调用
 import { useAppStore } from '../stores/appStore';
 import { showNextMessage } from '../services/messageService';
@@ -13,8 +20,10 @@ let model
 const store = useAppStore();
 const loadLive2DModel=async()=>{
   app = new PIXI.Application({
+    // @ts-ignore
     view: liveCanvas.value,
     resizeTo: window,
+    // @ts-ignore
     autoSize: true,
     backgroundAlph:0,
     resolution: window.devicePixelRatio ,

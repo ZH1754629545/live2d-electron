@@ -1,7 +1,6 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
 import { loadConfig, saveConfig, updateWindowConfig } from '../renderer/src/utils/config'
 import { getTodos ,saveTodos} from '../renderer/src/utils/todo'
 import fs from 'fs'
@@ -35,7 +34,8 @@ function createWindow(): void {
 
   // 设置窗口位置（如果配置中有指定）
   if (windowConfig.x !== null && windowConfig.y !== null) {
-    mainWindow.setPosition(windowConfig.x, windowConfig.y)
+    mainWindow.setPosition(  windowConfig.x !== undefined ? windowConfig.x : 100, 
+      windowConfig.y !== undefined ? windowConfig.y : 100)
   }
   
   // 保存窗口位置和大小
@@ -161,7 +161,7 @@ ipcMain.handle('get-model-files', (_, folderName) => {
     const modelFolderPath = path.join(__dirname, '../../src/public/live2d/model',folderName);
     
     // 递归查找文件夹中的所有model3.json文件
-    const findModel3Files = (dir, fileList = []) => {
+    const findModel3Files = (dir, fileList: string[] = []) => {
       const files = fs.readdirSync(dir);
       for (const file of files) {
         const filePath = path.join(dir, file);
@@ -173,6 +173,7 @@ ipcMain.handle('get-model-files', (_, folderName) => {
           // 获取相对于模型文件夹的路径
           const relativePath = path.relative(modelFolderPath, filePath);
           fileList.push(relativePath.replace(/\\/g, '/'));
+
         }
       }
       
@@ -198,7 +199,7 @@ ipcMain.handle('get-model-files', (_, folderName) => {
   });
 
 // 添加更新窗口设置的IPC处理程序
-  ipcMain.handle('update-window-settings', (_, settings) => {
+  ipcMain.handle('update-window-settings', (_) => {
     try {
       const mainWindow = BrowserWindow.getFocusedWindow();
       if (mainWindow) {

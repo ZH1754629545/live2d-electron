@@ -1,6 +1,5 @@
 import fs from 'fs'
 import { join } from 'path'
-import { app } from 'electron'
 
 // 定义配置接口
 export interface WindowConfig {

@@ -2,12 +2,13 @@ import { ref, readonly } from 'vue';
 import { useConfigStore } from '../stores/configStore';
 import { useTodoStore } from '../stores/todoStore';
 import axios from 'axios';
+import { TodoType } from '@renderer/components/toolItem/todo/Todo';
 // 消息状态
 const currentMessage = ref('');
 const currentPriority = ref(5); // 添加当前消息的优先级信息
-const messageQueue = ref([]);
+const messageQueue = ref<Message[]>([]);
 const isVisible = ref(false);
-let hitokotoTimer = null; // 添加一言定时器变量
+let hitokotoTimer :NodeJS.Timeout|null = null; // 添加一言定时器变量
 let messageIdCounter = 0; // 消息ID计数器，用于标识
 // 消息类型和优先级
 type MessagePriority = 'low' | 'normal' | 'high';
@@ -24,12 +25,23 @@ interface Message {
   timestamp: number;
   messageId: number; // 添加消息ID字段
 }
-
+interface AppConfig {
+  messageBox?: {
+    autoHide?: boolean;
+    autoHideDelay?: number;
+    hitokotoInterval?: number;
+  };
+  system?: {
+    lastStartDate?: string;
+    // 其他系统配置...
+  };
+  // 其他配置项...
+}
 // 获取配置
-const getConfig = async () => {
+const getConfig = async (): Promise<AppConfig> => {
   const configStore = useConfigStore();
   await configStore.loadConfig();
-  return configStore.config;
+  return configStore.config as AppConfig;
 };
 
 // 检查是否是当天第一次启动
@@ -38,13 +50,13 @@ export const checkFirstStartOfDay = async () => {
   await configStore.loadConfig();
   
   const today = new Date().toDateString();
-  const lastStartDate = configStore.config.system?.lastStartDate || '';
+  const lastStartDate = (configStore.config as any).system?.lastStartDate || '';
   if (lastStartDate !== today) {
     // 更新最后启动日期
     await configStore.updateConfig({
       ...configStore.config,
       system: {
-        ...configStore.config.system,
+        ...(configStore.config as any).system,
         lastStartDate: today
       }
     });
@@ -83,6 +95,7 @@ export const showNextMessage = async() => {
     isVisible.value = true;
   if (messageQueue.value.length > 0) {
     const nextMessage = messageQueue.value.shift();
+    if (!nextMessage) return;
     currentMessage.value = nextMessage.text;
     currentPriority.value = nextMessage.priority;
     isVisible.value = true;
@@ -99,8 +112,7 @@ export const showNextMessage = async() => {
 // 自动隐藏消息
 const autoHideMessage = async () => {
   const config = await getConfig();
-  
-  if (config.messageBox?.autoHide && config.messageBox?.autoHideDelay > 0) {
+  if (config.messageBox?.autoHide && config.messageBox?.autoHideDelay && config.messageBox.autoHideDelay > 0) {
     setTimeout(() => {
       hideMessage();
     }, config.messageBox.autoHideDelay);
@@ -168,7 +180,11 @@ async function getTodayWeather() {
       return formatWeatherData(observeData);
 
   } catch (error) {
+    if (error instanceof Error) {
       console.error('天气获取流程失败:', error.message);
+    } else {
+        console.error('天气获取流程失败:', String(error));
+    }
       throw new Error('服务暂不可用，请稍后重试');
   }
 }
@@ -325,7 +341,7 @@ export const stopHitokotoTimer = () => {
 };
 
 // 添加待办事项提醒相关变量
-let todoReminderTimer = null;
+let todoReminderTimer: NodeJS.Timeout | null = null;
 const reminderSentIds = new Set(); // 用于记录已发送提醒的待办ID
 
 // 检查待办事项是否即将到期
@@ -333,7 +349,7 @@ const checkTodoReminders = () => {
   try {
     const todoStore = useTodoStore();
     console.log(todoStore.filteredAndSortedTodos)
-    const todos = todoStore.todos;
+    const todos = todoStore.todos as TodoType[];
     const now = new Date();
     
     todos.forEach(todo => {
@@ -349,7 +365,7 @@ const checkTodoReminders = () => {
           const reminderKey = `todo_${todo.id}_30min`;
           
           if (!reminderSentIds.has(reminderKey)) {
-            addMessage(`待办事项"${todo.title}"即将在${parseInt(diffMinutes)}分钟后到期，请及时处理！`, 'high');
+            addMessage(`待办事项"${todo.title}"即将在${Math.floor(diffMinutes)}分钟后到期，请及时处理！`, 'high');
             reminderSentIds.add(reminderKey);
             showNextMessage();
             // 24小时后清除提醒记录，允许再次提醒

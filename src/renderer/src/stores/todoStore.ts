@@ -1,9 +1,10 @@
+import { TodoType } from '@renderer/components/toolItem/todo/Todo';
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
 export const useTodoStore = defineStore('todo', () => {
   // 状态
-  const todos = ref([]);
+  const todos = ref<TodoType[]>([]);
   const filter = ref({
     dates: [],
     importance: 0,
@@ -104,13 +105,13 @@ export const useTodoStore = defineStore('todo', () => {
     
     // 应用排序
     if (sort.value === 'createTime') {
-      result.sort((a, b) => new Date(b.createTime) - new Date(a.createTime));
+      result.sort((a, b) => new Date(b.createTime).getTime() - new Date(a.createTime).getTime());
     } else if (sort.value === 'importance') {
       result.sort((a, b) => b.importance - a.importance);
     } else if (sort.value === 'dueTime') {
-      result.sort((a, b) => new Date(changeHHMMToDate(a.dueTime)) - new Date(changeHHMMToDate(b.dueTime)));
+      result.sort((a, b) => new Date(changeHHMMToDate(a.dueTime)).getTime() - new Date(changeHHMMToDate(b.dueTime)).getTime());
     } else if (sort.value === 'startTime') {
-      result.sort((a, b) => new Date(changeHHMMToDate(a.startTime)) - new Date(changeHHMMToDate(b.startTime)));
+      result.sort((a, b) => new Date(changeHHMMToDate(a.startTime)).getTime() - new Date(changeHHMMToDate(b.startTime)).getTime());
     }
     
     return result;
