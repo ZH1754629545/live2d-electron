@@ -1,7 +1,7 @@
 import { join } from 'path'
 import fs from 'fs'
 const getTODOPath =()=>{
-  return join(__dirname, '../../src/public/todo/TODO.json')
+  return join(__dirname, '../../resources/public/todo/TODO.json')
 }
 
 export const getTodos = ()=>{

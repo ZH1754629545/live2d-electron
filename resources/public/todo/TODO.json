@@ -26,7 +26,7 @@
       "id": 1745931429822,
       "title": "每日1",
       "content": "",
-      "completed": false,
+      "completed": true,
       "startTime": "20:57",
       "dueTime": "20:58",
       "createTime": "2025/4/29 20:57:09",
@@ -234,7 +234,7 @@
       "id": 1746627366892,
       "title": "测试",
       "content": "",
-      "completed": false,
+      "completed": true,
       "startTime": "2025-05-07 22:16",
       "dueTime": "2025-05-08 22:16",
       "createTime": "2025/5/7 22:16:06",
@@ -244,9 +244,10 @@
   "settings": {
     "filter": {
       "dates": [],
-      "importance": 0
+      "importance": 0,
+      "dailyShowOnly": false
     },
     "sort": "startTime"
   },
-  "updateTime": "2025/5/8 11:46:48"
+  "updateTime": "2025/5/8 21:49:23"
 }

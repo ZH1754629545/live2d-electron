@@ -5,7 +5,7 @@ import { getConfigPath, loadConfig, saveConfig, updateWindowConfig } from '../re
 import { getTodos ,saveTodos} from '../renderer/src/utils/todo'
 import fs from 'fs'
 import path from 'path'
-import { deprecate } from 'util'
+
 
 function createWindow(): void {
   // 加载配置
@@ -103,6 +103,7 @@ app.whenReady().then(() => {
     return loadConfig()
   })
   createWindow()
+  //获取模型路径
   ipcMain.handle('get-model-path',()=>{
     const config=loadConfig();
     const currentModel=config.model.path;
@@ -162,7 +163,8 @@ app.whenReady().then(() => {
   // 添加获取模型文件夹的IPC处理程序
   ipcMain.handle('get-model-folders', () => {
     try {
-      const modelsPath = path.join(__dirname, '../../src/public/live2d/model');
+      const modelsPath = path.join(getConfigPath(), '../../','live2d/model');
+
       const folders = fs.readdirSync(modelsPath).filter(file => {
         return fs.statSync(path.join(modelsPath, file)).isDirectory();
       });
@@ -176,7 +178,7 @@ app.whenReady().then(() => {
   // 添加获取模型文件的IPC处理程序
 ipcMain.handle('get-model-files', (_, folderName) => {
   try {
-    const modelFolderPath = path.join(__dirname, '../../src/public/live2d/model',folderName);
+    const modelFolderPath = path.join(getConfigPath(), '../../','live2d/model',folderName);
     
     // 递归查找文件夹中的所有model3.json文件
     const findModel3Files = (dir, fileList: string[] = []) => {
@@ -235,7 +237,6 @@ ipcMain.handle('get-model-files', (_, folderName) => {
 
   //获取todo信息
   ipcMain.handle('get-todos', () => {
-    
     return getTodos();
   })
   //保存todo
