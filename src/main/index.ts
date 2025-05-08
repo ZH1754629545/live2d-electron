@@ -5,6 +5,7 @@ import { getConfigPath, loadConfig, saveConfig, updateWindowConfig } from '../re
 import { getTodos ,saveTodos} from '../renderer/src/utils/todo'
 import fs from 'fs'
 import path from 'path'
+import { deprecate } from 'util'
 
 function createWindow(): void {
   // 加载配置
@@ -71,13 +72,13 @@ function createWindow(): void {
   }
   
   // 添加自定义拖拽区域处理
-  mainWindow.webContents.on('did-finish-load', () => {
-    mainWindow.webContents.executeJavaScript(`
-      document.querySelectorAll('canvas').forEach(el => {
-        el.style.webkitAppRegion = 'no-drag';
-      });
-    `);
-  });
+  // mainWindow.webContents.on('did-finish-load', () => {
+  //   mainWindow.webContents.executeJavaScript(`
+  //     document.querySelectorAll('canvas').forEach(el => {
+  //       el.style.webkitAppRegion = 'no-drag';
+  //     });
+  //   `);
+  // });
 }
 
 // This method will be called when Electron has finished
@@ -108,7 +109,8 @@ app.whenReady().then(() => {
     return path.join(getConfigPath(),'../../','live2d/model',currentModel);
   })
   //窗口拖动
-  let isDragging = false;
+  //@deprecated
+ /* let isDragging = false;
   let dragOffset = { x: 0, y: 0 , width: 0, height: 0};
   ipcMain.on('start-drag', (_, position) => {
     isDragging = true;
@@ -147,7 +149,7 @@ app.whenReady().then(() => {
 
   ipcMain.on('end-drag', () => {
     isDragging = false;
-  });
+  });*/
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.

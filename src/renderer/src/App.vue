@@ -21,5 +21,7 @@ import MessageBox from "./components/MessageBox.vue";
   position: relative;
   width: 100%;
   height: 100%;
+   /* 确保整个应用容器不可拖拽 */
+   -webkit-app-region: no-drag;
 }
 </style>
