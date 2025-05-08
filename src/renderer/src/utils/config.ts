@@ -59,8 +59,8 @@ const defaultConfig: AppConfig = {
 }
 
 // 获取配置文件路径
-const getConfigPath = (): string => {
-  return join(__dirname,'../../' ,'src/public/config/config.json')
+export const getConfigPath = (): string => {
+  return join(__dirname,'../../' ,'resources/public/config/config.json')
 }
 
 // 读取配置

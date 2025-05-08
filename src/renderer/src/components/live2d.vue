@@ -53,13 +53,17 @@ const loadLive2DModel=async()=>{
   window.addEventListener('resize', resizeHandler);
   console.log('开始加载模型')
   // 使用IPC获取配置
+
   const config = await window.electron.ipcRenderer.invoke('get-config');
-  const getPublicPath = new URL(('../../../public/live2d/model'), import.meta.url).href;
-  const modelPath = encodeURI('/'+config.model.path)
-  console.log('模型路径',getPublicPath+decodeURI(modelPath))
-  // 加载Live2D模型
-  console.log(getPublicPath+decodeURI(modelPath))
-  model=await Live2DModel.from(getPublicPath+decodeURI(modelPath));
+  console.log('模型配置',config)
+  // const getPublicPath = new URL(('../../../../resources/public/live2d/model'), import.meta.url).href;
+  // const modelPath = encodeURI('/'+config.model.path)
+  // console.log('模型路径',getPublicPath+decodeURI(modelPath))
+  // // 加载Live2D模型
+  // console.log(getPublicPath+decodeURI(modelPath))
+  const modelPath=await window.electron.ipcRenderer.invoke('get-model-path')
+  console.log('模型路径',modelPath)
+  model=await Live2DModel.from(modelPath);
   // model=await Live2DModel.from("https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json");
 
 

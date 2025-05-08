@@ -9,7 +9,7 @@ import MessageBox from "./components/MessageBox.vue";
 
 <template>
   <div class="app-container">
-    <DragButton style="-webkit-app-region: drag; "></DragButton>
+    <DragButton ></DragButton>
     <ToolbarList></ToolbarList>
     <live2d></live2d>
     <MessageBox />

@@ -1,7 +1,7 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain ,dialog} from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import { loadConfig, saveConfig, updateWindowConfig } from '../renderer/src/utils/config'
+import { getConfigPath, loadConfig, saveConfig, updateWindowConfig } from '../renderer/src/utils/config'
 import { getTodos ,saveTodos} from '../renderer/src/utils/todo'
 import fs from 'fs'
 import path from 'path'
@@ -46,8 +46,15 @@ function createWindow(): void {
 
   })
 
+    // 添加错误处理和调试信息
+    mainWindow.webContents.on('did-fail-load', ( errorCode, errorDescription) => {
+      console.error('页面加载失败:', errorCode, errorDescription)
+      dialog.showErrorBox('加载失败', `应用加载失败: ${errorDescription}`)
+    })
+  
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+    mainWindow.webContents.openDevTools()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -95,17 +102,25 @@ app.whenReady().then(() => {
     return loadConfig()
   })
   createWindow()
-
+  ipcMain.handle('get-model-path',()=>{
+    const config=loadConfig();
+    const currentModel=config.model.path;
+    return path.join(getConfigPath(),'../../','live2d/model',currentModel);
+  })
   //窗口拖动
   let isDragging = false;
-  let dragOffset = { x: 0, y: 0 };
+  let dragOffset = { x: 0, y: 0 , width: 0, height: 0};
   ipcMain.on('start-drag', (_, position) => {
     isDragging = true;
     const mainWindow = BrowserWindow.getFocusedWindow();
     if (mainWindow) {
+    const size=mainWindow.getSize(); 
+
       dragOffset = {
         x: position.x,
-        y: position.y
+        y: position.y,
+        width:size[0],
+        height:size[1]
       };
     }
   });
@@ -119,12 +134,13 @@ app.whenReady().then(() => {
       //更新偏移
       dragOffset = {
         x: position.x,
-        y: position.y
+        y: position.y,
+        width:dragOffset.width,
+        height:dragOffset.height
       }
-      let size=mainWindow.getSize(); // 先获取当前窗口大小
       mainWindow.setResizable(false); // 关闭窗口缩放
       mainWindow.setPosition(newX, newY,false);
-      mainWindow.setSize(size[0],size[1],false); // 重设尺寸为原始尺寸
+      mainWindow.setSize(dragOffset.width,dragOffset.height,false); // 重设尺寸为原始尺寸
       mainWindow.setResizable(true); // 重新开启缩放
     }
   });
