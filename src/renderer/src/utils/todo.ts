@@ -1,7 +1,13 @@
 import { join } from 'path'
 import fs from 'fs'
+import { getAppDataPath } from './config'
+import {is} from '@electron-toolkit/utils'
 const getTODOPath =()=>{
-  return join(__dirname, '../../resources/public/todo/TODO.json')
+  const appDataPath = getAppDataPath()
+  if(is.dev){
+    return join(__dirname, '../../resources/public/todo/TODO.json')
+  }
+  return join(appDataPath,'public','todo','TODO.json')
 }
 
 export const getTodos = ()=>{

@@ -1,9 +1,9 @@
 {
   "window": {
-    "width": 374,
+    "width": 378,
     "height": 770,
-    "x": 1022,
-    "y": 110,
+    "x": 1266,
+    "y": 156,
     "alwaysOnTop": false,
     "transparent": true,
     "frame": false,
@@ -33,6 +33,6 @@
     "autoHideDelay": 5000
   },
   "system": {
-    "lastStartDate": "Thu May 08 2025"
+    "lastStartDate": "Fri May 09 2025"
   }
 }

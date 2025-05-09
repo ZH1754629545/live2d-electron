@@ -57,5 +57,14 @@
       "electron",
       "esbuild"
     ]
+  },
+  "build": {
+    "extraResources": [
+      {
+        "from": "resources/public",
+        "to": "data/public",
+        "filter": ["**/*"]
+      }
+    ]
   }
 }

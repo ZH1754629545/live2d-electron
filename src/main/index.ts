@@ -1,7 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain ,dialog} from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import { getConfigPath, loadConfig, saveConfig, updateWindowConfig } from '../renderer/src/utils/config'
+import { getConfigPath, loadConfig, saveConfig, updateWindowConfig,getAppDataPath } from '../renderer/src/utils/config'
 import { getTodos ,saveTodos} from '../renderer/src/utils/todo'
 import fs from 'fs'
 import path from 'path'
@@ -108,6 +108,9 @@ app.whenReady().then(() => {
     const config=loadConfig();
     const currentModel=config.model.path;
     return path.join(getConfigPath(),'../../','live2d/model',currentModel);
+  })
+  ipcMain.handle('get-app-data-path',()=>{
+      return getAppDataPath();
   })
   //窗口拖动
   //@deprecated
