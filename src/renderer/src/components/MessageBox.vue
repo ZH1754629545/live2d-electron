@@ -74,6 +74,7 @@ async function saveSettings() {
       ...configStore.config,
       messageBox: { ...settings.value }
     };
+  
     
     // 保存到配置文件
     const success = await configStore.updateConfig(updatedConfig);
@@ -120,17 +121,18 @@ async function saveSettings() {
   
   <!-- 设置弹窗 -->
   <q-dialog v-model="showSettings" persistent>
-    <q-card style="min-width: 350px">
-      <q-card-section>
+    <q-card class="settings-dialog">
+      <q-card-section class="dialog-header">
         <div class="text-h6">消息框设置</div>
       </q-card-section>
 
-      <q-card-section class="q-pt-none">
+      <q-card-section class="q-pt-none dialog-content">
         <div class="q-mb-md setting-item">
           <div class="setting-label">宽度: {{ settings.width }}px</div>
           <q-slider v-model="settings.width" :min="200" :max="500" :step="10" />
         </div>
         
+        <!-- 其他设置项保持不变 -->
         <div class="q-mb-md setting-item">
           <div class="setting-label">高度: {{ settings.height }}px</div>
           <q-slider v-model="settings.height" :min="50" :max="200" :step="10" />
@@ -161,7 +163,7 @@ async function saveSettings() {
         </div>
       </q-card-section>
 
-      <q-card-actions align="right">
+      <q-card-actions align="right" class="dialog-actions">
         <q-btn flat label="取消" color="primary" v-close-popup />
         <q-btn flat label="保存" color="primary" @click="saveSettings" />
       </q-card-actions>
@@ -270,5 +272,39 @@ async function saveSettings() {
   50% { border-color: #333 }
 }
 
-/* 其他样式保持不变 */
+/* 添加响应式对话框样式 */
+.settings-dialog {
+  width: 80%;
+  max-width: 90vw;
+  max-height: 90vh;
+  min-width: min(350px, 95vw);
+  transition: width 0.3s, height 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-header {
+  padding: 12px 20px;
+}
+
+.dialog-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 20px;
+}
+
+.dialog-actions {
+  padding: 8px 20px;
+}
+
+/* 小屏幕适配 */
+@media (max-width: 400px) {
+  .settings-dialog {
+    width: 95%;
+  }
+  
+  .setting-label {
+    font-size: 14px;
+  }
+}
 </style>

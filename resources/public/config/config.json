@@ -1,9 +1,9 @@
 {
   "window": {
-    "width": 378,
-    "height": 770,
-    "x": 1266,
-    "y": 156,
+    "width": 424,
+    "height": 626,
+    "x": 1228,
+    "y": 302,
     "alwaysOnTop": false,
     "transparent": true,
     "frame": false,
@@ -24,12 +24,12 @@
     "autoHideDelay": 5000
   },
   "messageBox": {
-    "width": 380,
+    "width": 390,
     "height": 100,
     "bottom": 40,
     "left": 30,
     "opacity": 0.8,
-    "autoHide": false,
+    "autoHide": true,
     "autoHideDelay": 5000
   },
   "system": {

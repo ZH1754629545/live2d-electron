@@ -80,14 +80,14 @@ const handleMouseLeave=()=>{
 
   <!-- 弹窗组件 -->
   <q-dialog v-model="showDialog" persistent>
-    <q-card style="min-width: 350px">
+    <q-card class="responsive-dialog">
       <q-card-section class="row items-center">
         <div class="text-h6">{{ dialogTitle }}</div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
 
-      <q-card-section>
+      <q-card-section class="dialog-content">
         <!-- 动态组件 -->
         <component 
           :is="currentComponent" 
@@ -118,7 +118,7 @@ const handleMouseLeave=()=>{
 .toolbar-list::-webkit-scrollbar {
     width: 0;
     display: none;
-  }
+}
 @keyframes float {
   0% {
     transform: translateY(-50%);
@@ -160,5 +160,26 @@ const handleMouseLeave=()=>{
 .q-item__section--avatar {
   color: inherit;
   min-width: 10px;
+}
+
+/* 添加响应式对话框样式 */
+.responsive-dialog {
+  width: 80%;
+  max-width: 90vw;
+  max-height: 90vh;
+  min-width: 350px;
+  transition: width 0.3s, height 0.3s;
+}
+
+/* 在小窗口下调整最小宽度 */
+@media (max-width: 400px) {
+  .responsive-dialog {
+    min-width: 95vw;
+  }
+}
+
+.dialog-content {
+  max-height: calc(90vh - 60px);
+  overflow-y: auto;
 }
 </style>
