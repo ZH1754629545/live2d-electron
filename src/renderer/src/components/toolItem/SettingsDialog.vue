@@ -11,7 +11,8 @@ const settings = ref({
   scale: 0.11, // 默认缩放比例
   draggable: false, // 是否可拖动
   alwaysOnTop: false, // 是否置顶
-  roundedCorners:false// 圆角(边框显示)
+  roundedCorners: false, // 圆角(边框显示)
+  systemVolume: 50 // 添加系统音量设置，默认50%
 });
 
 // 获取当前配置
@@ -25,7 +26,8 @@ const getSettings = async () => {
       scale: config.model.scale || 0.11,
       draggable: config.model.draggable || false,
       alwaysOnTop: config.window.alwaysOnTop || false,
-      roundedCorners:config.window.roundedCorners||false,
+      roundedCorners: config.window.roundedCorners || false,
+      systemVolume: config.system.systemVolume*100 || 50, // 获取音量设置
     };
   } catch (error) {
     console.error('获取设置失败:', error);
@@ -44,7 +46,9 @@ const saveSettings = async () => {
     config.model.scale = settings.value.scale;
     config.model.draggable = settings.value.draggable;
     config.window.alwaysOnTop = settings.value.alwaysOnTop;
-    config.window.roundedCorners=settings.value.roundedCorners;
+    config.window.roundedCorners = settings.value.roundedCorners;
+    config.system.systemVolume = settings.value.systemVolume/100; // 保存音量设置
+    
     await window.electron.ipcRenderer.invoke('save-config', config);
     
     // 通知应用更新设置
@@ -91,7 +95,8 @@ const resetSettings = () => {
     scale: 0.11,
     draggable: false,
     alwaysOnTop: false,
-    roundedCorners:false,
+    roundedCorners: false,
+    systemVolume: 50, // 重置音量
   };
 };
 watch(()=>settings.value.scale,(newScale)=>{
@@ -125,7 +130,19 @@ onMounted(() => {
         />
         <div class="text-caption text-center">{{ (settings.scale * 100).toFixed(0) }}%</div>
       </div>
-      
+      <div class="q-mb-md">
+        <p class="text-subtitle1 q-mb-sm">系统音量</p>
+        <q-slider
+          v-model="settings.systemVolume"
+          :min="0"
+          :max="100"
+          :step="1"
+          label
+          label-always
+          color="primary"
+        />
+        <div class="text-caption text-center">{{ settings.systemVolume }}%</div>
+      </div>
       <div class="q-mb-md">
         <q-toggle
           v-model="settings.draggable"

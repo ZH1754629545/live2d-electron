@@ -5,8 +5,7 @@ import { getConfigPath, loadConfig, saveConfig, updateWindowConfig,getAppDataPat
 import { getTodos ,saveTodos} from '../renderer/src/utils/todo'
 import fs from 'fs'
 import path from 'path'
-
-
+import { getAudioPath } from '../renderer/src/utils/systemAudioMapping'
 function createWindow(): void {
   // 加载配置
   const config = loadConfig()
@@ -159,8 +158,11 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
-  ipcMain.handle('exit-app', () => {
+  ipcMain.handle('exit-app', async() => {
+
+    // 退出应用
     app.quit();
+    // app.quit();
   });
   
   // 添加获取模型文件夹的IPC处理程序
@@ -248,12 +250,23 @@ ipcMain.handle('get-model-files', (_, folderName) => {
   })
 
 })
+  // 添加音频相关的IPC处理程序
+  ipcMain.handle('get-system-audio-volume', () => {
+    const config = loadConfig();
+    
+    // 如果配置中没有音频设置，返回默认值0.5
+    return config.system.systemVolume;
+  });
+  ipcMain.handle('get-system-audio-path', (_,name) => {
+    return getAudioPath(name);
+  });
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
+
     app.quit()
   }
     ipcMain.on('save-config', (_, newConfig) => {

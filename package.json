@@ -26,6 +26,7 @@
     "@quasar/extras": "^1.16.17",
     "axios": "^1.9.0",
     "electron-updater": "^6.3.9",
+    "howler": "^2.2.4",
     "pinia": "^3.0.2",
     "pixi-live2d-display": "^0.4.0",
     "pixi.js": "6.x",
@@ -36,6 +37,7 @@
     "@electron-toolkit/eslint-config-ts": "^3.0.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@quasar/vite-plugin": "^1.9.0",
+    "@types/howler": "^2.2.12",
     "@types/node": "^22.14.1",
     "@vitejs/plugin-vue": "^5.2.3",
     "electron": "^35.1.5",
@@ -63,7 +65,9 @@
       {
         "from": "resources/public",
         "to": "data/public",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "win": {

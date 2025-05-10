@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { playSystemAudio } from '@renderer/services/audioService';
+
 const emit = defineEmits(['close']);
 
 // 关闭对话框
@@ -7,6 +9,8 @@ const closeDialog = () => {
 };
 const closeWin=async()=>{
     try {
+    closeDialog();
+    await playSystemAudio('exit');
     await window.electron.ipcRenderer.invoke('exit-app');
   } catch (error) {
     console.error('退出应用失败:', error);

@@ -22,6 +22,9 @@ export interface ModelConfig {
     y: number
   }
 }
+export interface SystemConfig {
+  systemVolume: number
+}
 
 export interface AppConfig {
   window: WindowConfig
@@ -31,6 +34,7 @@ export interface AppConfig {
     autoHide?: boolean
     autoHideDelay?: number
   }
+  system:SystemConfig;
 }
 
 // 默认配置
@@ -56,6 +60,9 @@ const defaultConfig: AppConfig = {
     followMouse: true,
     autoHide: false,
     autoHideDelay: 5000
+  },
+  system:{
+    systemVolume: 50
   }
 }
 //获取appdata路径
