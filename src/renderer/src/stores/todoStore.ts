@@ -2,6 +2,10 @@ import { TodoType } from '@renderer/components/toolItem/todo/Todo';
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
+// 添加事件总线用于通知
+import mitt from 'mitt';
+export const todoEventBus = mitt();
+
 export const useTodoStore = defineStore('todo', () => {
   // 状态
   const todos = ref<TodoType[]>([]);
@@ -140,6 +144,9 @@ export const useTodoStore = defineStore('todo', () => {
     if (index !== -1) {
       todos.value[index].completed = true;
       saveTodos();
+      console.log('完成待办事项:', todo);
+      // 触发完成事件，传递待办信息
+      todoEventBus.emit('todo-completed', todos.value[index]);
     }
   };
 

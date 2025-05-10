@@ -3,8 +3,9 @@ import { ref, onMounted ,watch} from 'vue';
 import TodoList from './todo/TodoList.vue';
 import TodoDetail from './todo/TodoDetail.vue';
 import TodoSettings from './todo/TodoSettings.vue';
-import { useTodoStore } from '../../stores/todoStore';
+import { useTodoStore, todoEventBus  } from '../../stores/todoStore';
 import { TodoType } from './todo/Todo';
+import { useQuasar } from 'quasar';
 
 const emit = defineEmits(['close']);
 const showDetail = ref(false);
@@ -62,10 +63,19 @@ const updateTodo = (newTodo) => {
   todoStore.updateTodo(newTodo);
   showDetail.value = false;
 };
-
+const q = useQuasar();
 onMounted(() => {
   // 确保数据是最新的
   todoStore.loadTodos();
+
+  todoEventBus.on('todo-completed', (todo) => {
+    q.notify({
+      message: `待办"${(todo as TodoType).title}"已完成`,
+      color: 'positive',
+      position: 'top',
+      timeout: 2000
+    });
+  });
 });
 
 // 监听 activeTab 的变化

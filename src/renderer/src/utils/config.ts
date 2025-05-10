@@ -80,7 +80,6 @@ export const getConfigPath = (): string => {
   // 检查是否在渲染进程�?
   const appDataPath = getAppDataPath();
   if(is.dev){
-    console.log('is dev')
     return path.join(__dirname, '../../', 'resources/public/config/config.json');
   }
   return path.join(appDataPath,'public', 'config','config.json');
