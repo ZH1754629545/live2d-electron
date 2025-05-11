@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue';
 import { useQuasar } from 'quasar';
 import { useMessageState, hideMessage} from '../services/messageService';
 import { useConfigStore } from '../stores/configStore';
-import { checkFirstStartOfDay, fetchWeatherAndShow,startHitokotoTimer ,cleanupMessageService,startTodoReminderTimer} from '../services/messageService';
+import { checkFirstStartOfDay, fetchWeatherAndShow ,cleanupMessageService,startTodoReminderTimer} from '../services/messageService';
 
 
 // 获取消息状态

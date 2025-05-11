@@ -21,5 +21,5 @@ export function getAudioPath(audioName: string): string {
   if(is.dev){
     return path.join(__dirname, '../../resources/public/audio/system', audioFileName);
   }
-  return path.join(appDataPath,'public','audio','systemAudio', audioFileName);
+  return path.join(appDataPath,'public','audio','system', audioFileName);
 }
