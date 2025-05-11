@@ -84,6 +84,7 @@ const loadLive2DModel=async()=>{
     store.updateToolbar({ visible: true });
   });
   model.on('click',()=>{
+    console.log('模型被点击')
     showNextMessage();
   })
   // 添加拖拽功能

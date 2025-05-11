@@ -3,6 +3,7 @@ import { useConfigStore } from '../stores/configStore';
 import { useTodoStore } from '../stores/todoStore';
 import axios from 'axios';
 import { TodoType } from '@renderer/components/toolItem/todo/Todo';
+import { playSystemAudio } from './audioService';
 // 消息状态
 const currentMessage = ref('');
 const currentPriority = ref(5); // 添加当前消息的优先级信息
@@ -99,6 +100,9 @@ export const showNextMessage = async() => {
     currentMessage.value = nextMessage.text;
     currentPriority.value = nextMessage.priority;
     isVisible.value = true;
+    if(currentMessage.value.includes('待办事项')){
+      playSystemAudio('todoAleart');
+    }
     // 自动隐藏
     autoHideMessage();
   } else {
@@ -140,6 +144,14 @@ export const clearAllMessages = () => {
 
 // 预设消息类型
 export const showWeatherMessage = (weatherInfo: string) => {
+  const hour = new Date().getHours();
+  var audioName = 'morning';
+  if(hour>=11&&hour<=14){
+      audioName = 'noon'
+  }else{
+    audioName = 'afternoon';
+  }
+  playSystemAudio(audioName);
   addMessage(`${weatherInfo}`, 'high');
 };
 
@@ -367,7 +379,6 @@ const checkTodoReminders = () => {
           if (!reminderSentIds.has(reminderKey)) {
             addMessage(`待办事项"${todo.title}"即将在${Math.floor(diffMinutes)}分钟后到期，请及时处理！`, 'high');
             reminderSentIds.add(reminderKey);
-            showNextMessage();
             // 24小时后清除提醒记录，允许再次提醒
             setTimeout(() => {
               reminderSentIds.delete(reminderKey);

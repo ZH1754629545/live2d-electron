@@ -3,12 +3,12 @@ import { getAppDataPath } from './config'
 import {is} from '@electron-toolkit/utils'
 // 音频文件映射
 export const audioMapping = {
-  welcome: 'welcome.mp3',
-  notification: 'notification.mp3',
-  completed: 'completed.mp3',
-  error: 'error.mp3',
-  click: 'click.mp3',
-  exit:'exit.wav'
+  exit:'exit.wav',
+  afternoon:'afternoon.wav',
+  morning:'morning.wav',
+  noon:'noon.wav',
+  openTodo:'openTodo.mp3',
+  todoAleart:'todoAleart.mp3',
 };
 
 // 获取音频文件的绝对路径

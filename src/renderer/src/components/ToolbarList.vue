@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { playSystemAudio } from '@renderer/services/audioService';
 import { useAppStore } from '../stores/appStore';
 import { computed, ref, shallowRef, defineAsyncComponent } from 'vue';
 
@@ -47,7 +48,9 @@ const componentMap = {
 const openDialog = (item) => {
   dialogTitle.value = item.name;
   currentComponent.value = componentMap[item.component];
-  console.log(currentComponent.value)
+  if(item.name =='待办'){
+    playSystemAudio('openTodo')
+  }
   showDialog.value = true;
 };
 

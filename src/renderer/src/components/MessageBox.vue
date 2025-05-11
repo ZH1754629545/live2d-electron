@@ -49,7 +49,7 @@ onMounted(async () => {
   if (isFirstStart) {
     fetchWeatherAndShow();
   }
-  startHitokotoTimer(1);
+  // startHitokotoTimer(1);
   startTodoReminderTimer(1);
 });
 onBeforeUnmount(()=>{
