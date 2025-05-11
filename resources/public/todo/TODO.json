@@ -4,7 +4,7 @@
       "id": 1745931429822,
       "title": "每日1",
       "content": "",
-      "completed": true,
+      "completed": false,
       "startTime": "20:57",
       "dueTime": "20:58",
       "createTime": "2025/4/29 20:57:09",
@@ -26,7 +26,7 @@
       "id": 1745931459391,
       "title": "每日3",
       "content": "",
-      "completed": true,
+      "completed": false,
       "startTime": "22:57",
       "dueTime": "23:59",
       "createTime": "2025/4/29 20:57:39",
@@ -95,5 +95,5 @@
     },
     "sort": "startTime"
   },
-  "updateTime": "2025/5/10 13:53:47"
+  "updateTime": "2025/5/11 14:14:43"
 }

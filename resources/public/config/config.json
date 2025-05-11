@@ -1,9 +1,9 @@
 {
   "window": {
     "width": 426,
-    "height": 766,
-    "x": 1190,
-    "y": 172,
+    "height": 770,
+    "x": 1262,
+    "y": 240,
     "alwaysOnTop": false,
     "transparent": true,
     "frame": false,
@@ -24,7 +24,7 @@
     "autoHideDelay": 5000
   },
   "system": {
-    "lastStartDate": "Sat May 10 2025",
+    "lastStartDate": "Sun May 11 2025",
     "systemVolume": 0.5
   },
   "messageBox": {

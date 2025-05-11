@@ -223,7 +223,6 @@ const cancelDelete = () => {
           <q-checkbox 
             v-model="editedTodo.completed" 
             label="已完成" 
-            disable 
           />
         </div>
         <div class="q-mb-md">
