@@ -1,9 +1,9 @@
 {
   "window": {
-    "width": 426,
-    "height": 770,
-    "x": 1262,
-    "y": 240,
+    "width": 378,
+    "height": 678,
+    "x": 1304,
+    "y": 312,
     "alwaysOnTop": false,
     "transparent": true,
     "frame": false,
@@ -24,16 +24,19 @@
     "autoHideDelay": 5000
   },
   "system": {
-    "lastStartDate": "Sun May 11 2025",
+    "lastStartDate": "Fri Aug 08 2025",
     "systemVolume": 0.5
   },
   "messageBox": {
     "width": 390,
-    "height": 100,
-    "bottom": 40,
+    "height": 210,
+    "bottom": 20,
     "left": 30,
     "opacity": 0.8,
     "autoHide": true,
     "autoHideDelay": 5000
+  },
+  "avatar": {
+    "assistant": "D:/App/project/live2d-electron/resources/avatar/mari_normal.png"
   }
 }

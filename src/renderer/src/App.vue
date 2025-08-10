@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import Live2d from "./components/live2d.vue";
-import DragButton from "./components/drag.vue";
-import ToolbarList from "./components/ToolbarList.vue";
-import MessageBox from "./components/MessageBox.vue";
+import { defineAsyncComponent } from 'vue';
 
-
+// Use async components to avoid type resolution issues for .vue default exports in lints
+const DragButton = defineAsyncComponent(() => import('./components/drag.vue'));
+const ToolbarList = defineAsyncComponent(() => import('./components/ToolbarList.vue'));
+// const MessageBox = defineAsyncComponent(() => import('./components/MessageBox.vue'));
+const AIChatBox = defineAsyncComponent(() => import('./components/AIChatBox.vue'));
+const Live2d = defineAsyncComponent(() => import('./components/Live2d.vue'));
 </script>
 
 <template>
@@ -12,7 +14,8 @@ import MessageBox from "./components/MessageBox.vue";
     <DragButton ></DragButton>
     <ToolbarList></ToolbarList>
     <live2d></live2d>
-    <MessageBox />
+    <!-- <MessageBox /> -->
+    <AIChatBox />
   </div>
 </template>
 
