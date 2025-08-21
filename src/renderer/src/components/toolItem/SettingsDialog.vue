@@ -27,7 +27,7 @@ const getSettings = async () => {
       draggable: config.model.draggable || false,
       alwaysOnTop: config.window.alwaysOnTop || false,
       roundedCorners: config.window.roundedCorners || false,
-      systemVolume: config.system.systemVolume*100 || 50, // 获取音量设置
+      systemVolume: config.system.systemVolume*100 || 50 // 获取音量设置
     };
   } catch (error) {
     console.error('获取设置失败:', error);
@@ -96,7 +96,7 @@ const resetSettings = () => {
     draggable: false,
     alwaysOnTop: false,
     roundedCorners: false,
-    systemVolume: 50, // 重置音量
+    systemVolume: 50 // 重置音量
   };
 };
 watch(()=>settings.value.scale,(newScale)=>{
@@ -164,6 +164,7 @@ onMounted(() => {
           color="primary"
         />
       </div>
+      
       
       <div class="row justify-end q-mt-lg">
         <q-btn label="重置" color="grey" flat @click="resetSettings" class="q-mr-sm" />

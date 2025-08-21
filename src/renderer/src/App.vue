@@ -6,16 +6,16 @@ const DragButton = defineAsyncComponent(() => import('./components/drag.vue'));
 const ToolbarList = defineAsyncComponent(() => import('./components/ToolbarList.vue'));
 // const MessageBox = defineAsyncComponent(() => import('./components/MessageBox.vue'));
 const AIChatBox = defineAsyncComponent(() => import('./components/AIChatBox.vue'));
-const Live2d = defineAsyncComponent(() => import('./components/Live2d.vue'));
+const Live2d = defineAsyncComponent(() => import('./components/live2d.vue'));
 </script>
 
 <template>
   <div class="app-container">
-    <DragButton ></DragButton>
-    <ToolbarList></ToolbarList>
-    <live2d></live2d>
-    <!-- <MessageBox /> -->
-    <AIChatBox />
+   <DragButton ></DragButton>
+   <ToolbarList></ToolbarList>
+  <live2d></live2d>
+<!--    &lt;!&ndash; <MessageBox /> &ndash;&gt;-->
+   <AIChatBox />
   </div>
 </template>
 

@@ -62,6 +62,22 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
+  // Prevent F11 from toggling fullscreen and block HTML fullscreen
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.type === 'keyDown' && (input.key?.toUpperCase?.() === 'F11' || input.code === 'F11')) {
+      event.preventDefault()
+    }
+  })
+  // If something forces fullscreen, immediately exit
+  mainWindow.on('enter-full-screen', () => {
+    mainWindow.setFullScreen(false)
+  })
+  mainWindow.webContents.on('enter-html-full-screen', () => {
+    mainWindow.webContents.executeJavaScript(
+      "document.exitFullscreen && document.exitFullscreen().catch(()=>{})"
+    ).catch(() => {})
+  })
+
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {

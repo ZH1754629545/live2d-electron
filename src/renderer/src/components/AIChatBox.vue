@@ -2,6 +2,8 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useQuasar } from 'quasar';
 import { useConfigStore } from '../stores/configStore';
+import { defineAsyncComponent } from 'vue';
+const AIChatPanel = defineAsyncComponent(() => import('./AIChatPanel.vue'));
 
 // Visible state is managed here (separate from legacy MessageBox visibility)
 const isVisible = ref(true);
@@ -22,6 +24,12 @@ const settings = ref({
 const showSettings = ref(false);
 const showChatDialog = ref(false);
 const mcpEnabled = ref(false);
+
+// Computed properties for template
+const ttsConfig = computed(() => (configStore.config as any)?.tts || null);
+const translationConfig = computed(() => (configStore.config as any)?.translation || null);
+const assistantAvatarUrl = computed(() => (configStore.config as any)?.avatar?.assistant || '');
+const apiBase = computed(() => 'http://localhost:8080/api');
 
 // Dynamic box height that can grow with iframe content up to a cap
 const currentBoxHeight = ref<number>(settings.value.height);
@@ -68,17 +76,19 @@ const boxStyle = computed(() => {
   } as Record<string, string>;
 });
 
-const iframeSrc = computed(() => {
-  const maxInputPx = 120; // max auto-grow height for input area inside iframe
-  const params = new URLSearchParams({ maxInputPx: String(maxInputPx), mode: 'compact', externalMcp: '1' });
-  return `/ai-chat-frame.html?${params.toString()}`;
-});
 
-const iframeFullSrc = computed(() => {
-  const maxInputPx = 160;
-  const params = new URLSearchParams({ maxInputPx: String(maxInputPx), mode: 'full', externalMcp: '1' });
-  return `/ai-chat-frame.html?${params.toString()}`;
-});
+
+// iframe sources removed after refactor to Vue child component
+
+function onChildResize(p: { height: number; from: 'input' | 'content' }) {
+  const desiredBoxHeight = p.height + headerHeight + 16;
+  const next = Math.min(desiredBoxHeight, maxBoxHeight.value);
+  if (p.from === 'input') {
+    currentBoxHeight.value = next;
+  } else if (Math.abs(next - currentBoxHeight.value) >= 8) {
+    currentBoxHeight.value = next;
+  }
+}
 
 const fullWindowStyle = computed(() => {
   return {
@@ -130,26 +140,35 @@ function openFullChat() {
     if (smallIframe && smallIframe.contentWindow) {
       smallIframe.contentWindow.postMessage({ type: 'chat:getHistory' }, '*');
     }
-    // Also apply avatar CSS var to full iframe when ready
+    // Also apply avatar CSS var and TTS config to full iframe when ready
     const assistantAvatar = (configStore.config as any)?.avatar?.assistant || '/resources/avatar/mari_normal.png';
     const fullInterval = setInterval(() => {
       const fullIframe = document.getElementById('ai-chat-iframe-full') as HTMLIFrameElement | null;
       if (fullIframe && fullIframe.contentDocument && fullIframe.contentDocument.documentElement) {
         fullIframe.contentDocument.documentElement.style.setProperty('--assistant-avatar', `url('${assistantAvatar}')`);
+        // push TTS config to full iframe
+        const ttsConfig = (configStore.config as any)?.tts || null;
+        try { fullIframe.contentWindow?.postMessage({ type: 'chat:ttsConfig', config: ttsConfig }, '*'); } catch {}
         clearInterval(fullInterval);
       }
     }, 200);
   }, 200);
 }
 
-function postMcpStateToFrames() {
-  const smallIframe = document.getElementById('ai-chat-iframe') as HTMLIFrameElement | null;
-  if (smallIframe && smallIframe.contentWindow) {
-    smallIframe.contentWindow.postMessage({ type: 'chat:mcp', enabled: mcpEnabled.value }, '*');
-  }
-  const fullIframe = document.getElementById('ai-chat-iframe-full') as HTMLIFrameElement | null;
-  if (fullIframe && fullIframe.contentWindow) {
-    fullIframe.contentWindow.postMessage({ type: 'chat:mcp', enabled: mcpEnabled.value }, '*');
+
+
+async function saveMcpSettings() {
+  try {
+    const updatedConfig = {
+      ...configStore.config,
+      mcp: {
+        enabled: mcpEnabled.value
+      }
+    } as Record<string, unknown>;
+    const success = await configStore.updateConfig(updatedConfig);
+    if (!success) throw new Error('保存失败');
+  } catch (error) {
+    console.error('保存 MCP 设置失败', error);
   }
 }
 
@@ -175,6 +194,12 @@ onMounted(async () => {
     settings.value = { ...settings.value, ...(configStore.config as any).messageBox };
     currentBoxHeight.value = settings.value.height;
   }
+  
+  // 加载 MCP 配置
+  const mcpConfig = (configStore.config as any)?.mcp;
+  if (mcpConfig) {
+    mcpEnabled.value = mcpConfig.enabled || false;
+  }
   // Push assistant avatar to iframes via CSS var
   const assistantAvatar = (configStore.config as any)?.avatar?.assistant || '/resources/avatar/mari_normal.png';
   const applyAvatarVar = (id: string) => {
@@ -183,11 +208,23 @@ onMounted(async () => {
       el.contentDocument.documentElement.style.setProperty('--assistant-avatar', `url('${assistantAvatar}')`);
     }
   };
+  // Immediately push TTS config to compact iframe on mount (and again on load)
+  const initialTtsConfig = (configStore.config as any)?.tts || null;
+  const compactElImmediate = document.getElementById('ai-chat-iframe') as HTMLIFrameElement | null;
+  if (compactElImmediate?.contentWindow) {
+    try { compactElImmediate.contentWindow.postMessage({ type: 'chat:ttsConfig', config: initialTtsConfig }, '*'); } catch {}
+    compactElImmediate.addEventListener('load', () => {
+      try { compactElImmediate.contentWindow?.postMessage({ type: 'chat:ttsConfig', config: initialTtsConfig }, '*'); } catch {}
+    }, { once: true });
+  }
   // apply to compact iframe once ready
   const compactInterval = setInterval(() => {
     const el = document.getElementById('ai-chat-iframe') as HTMLIFrameElement | null;
     if (el && el.contentDocument) {
       applyAvatarVar('ai-chat-iframe');
+      // push TTS config to iframe
+      const ttsConfig = (configStore.config as any)?.tts || null;
+      try { el.contentWindow?.postMessage({ type: 'chat:ttsConfig', config: ttsConfig }, '*'); } catch {}
       clearInterval(compactInterval);
     }
   }, 200);
@@ -217,12 +254,6 @@ onBeforeUnmount(() => {
           <q-btn flat round dense icon="menu" size="sm">
             <q-menu anchor="bottom left" self="top left">
               <q-list dense>
-                <q-item clickable v-ripple>
-                  <q-item-section> MCP 启用 </q-item-section>
-                  <q-item-section side>
-                    <q-toggle v-model="mcpEnabled" dense @update:model-value="postMcpStateToFrames" />
-                  </q-item-section>
-                </q-item>
                 <q-item clickable v-ripple @click="showSettings = true">
                   <q-item-section> 设置 </q-item-section>
                 </q-item>
@@ -234,14 +265,17 @@ onBeforeUnmount(() => {
         <q-btn flat round dense icon="open_in_new" size="sm" @click="openFullChat" />
       </div>
       <div class="chat-content">
-        <iframe
-          id="ai-chat-iframe"
-          class="chat-iframe"
-          :src="iframeSrc"
-          title="AI Chat"
-          referrerpolicy="no-referrer"
-          sandbox="allow-scripts allow-forms allow-same-origin"
-        ></iframe>
+        <AIChatPanel
+          :mode="'compact'"
+          :maxInputPx="120"
+          :mcp-enabled="mcpEnabled"
+          :tts-config="ttsConfig"
+          :translation="translationConfig"
+          :assistant-avatar-url="assistantAvatarUrl"
+          :api-base="apiBase"
+          @resize="onChildResize"
+          @openSettings="showSettings = true"
+        />
       </div>
     </div>
   </transition>
@@ -288,17 +322,26 @@ onBeforeUnmount(() => {
     <q-card class="chat-window" :style="fullWindowStyle">
       <div class="chat-window-header">
         <div class="title">对话</div>
-        <q-btn flat round dense icon="close" size="sm" @click="showChatDialog = false" />
+        <div class="header-controls">
+          <q-toggle 
+            v-model="mcpEnabled" 
+            label="MCP服务" 
+            dense 
+            @update:model-value="saveMcpSettings"
+          />
+          <q-btn flat round dense icon="close" size="sm" @click="showChatDialog = false" />
+        </div>
       </div>
       <div class="chat-window-body">
-        <iframe
-          id="ai-chat-iframe-full"
-          class="chat-iframe"
-          :src="iframeFullSrc"
-          title="AI Chat Full"
-          referrerpolicy="no-referrer"
-          sandbox="allow-scripts allow-forms allow-same-origin"
-        ></iframe>
+        <AIChatPanel
+          :mode="'full'"
+          :maxInputPx="160"
+          :mcp-enabled="mcpEnabled"
+          :tts-config="ttsConfig"
+          :translation="translationConfig"
+          :assistant-avatar-url="assistantAvatarUrl"
+          :api-base="apiBase"
+        />
       </div>
     </q-card>
   </q-dialog>
@@ -373,6 +416,11 @@ onBeforeUnmount(() => {
   padding: 8px 10px; border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 .chat-window-header .title { font-weight: 600; }
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .chat-window-body { flex: 1; overflow: hidden; }
 </style>
 
