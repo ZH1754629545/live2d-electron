@@ -1,3 +1,103 @@
+<script lang="ts">
+// ===== 真正的全局 WebSocket 管理（在所有组件实例外部） =====
+let globalWebSocket: WebSocket | null = null;
+let globalReconnectTimer: number | null = null;
+const reconnectDelay = 3000;
+let messageHandlers: ((message: string) => void)[] = [];
+let currentApiBase: string = '';
+
+function connectGlobalWebSocket(apiBase: string) {
+  // 如果 API 基地址改变了，需要重新连接
+  if (currentApiBase !== apiBase && globalWebSocket) {
+    globalWebSocket.close(1000, 'API地址变更');
+    globalWebSocket = null;
+  }
+  currentApiBase = apiBase;
+
+  if (globalWebSocket && (globalWebSocket.readyState === WebSocket.CONNECTING || globalWebSocket.readyState === WebSocket.OPEN)) {
+    console.log('WebSocket 已连接，复用现有连接');
+    return;
+  }
+
+  try {
+    const wsUrl = apiBase
+      .replace(/^http:\/\//, 'ws://')
+      .replace(/^https:\/\//, 'wss://') + '/websocket';
+    console.log('建立新的 WebSocket 连接:', wsUrl);
+    globalWebSocket = new WebSocket(wsUrl);
+    
+    globalWebSocket.onopen = () => {
+      console.log('WebSocket 连接已建立:', wsUrl);
+      if (globalReconnectTimer) {
+        window.clearTimeout(globalReconnectTimer);
+        globalReconnectTimer = null;
+      }
+    };
+
+    globalWebSocket.onmessage = (event) => {
+      try {
+        const message = event.data;
+        console.log('收到 WebSocket 消息:', message);
+        messageHandlers.forEach(handler => {
+          try {
+            handler(message);
+          } catch (error) {
+            console.error('消息处理函数执行失败:', error);
+          }
+        });
+      } catch (error) {
+        console.error('处理 WebSocket 消息失败:', error);
+      }
+    };
+
+    globalWebSocket.onclose = (event) => {
+      console.log('WebSocket 连接关闭:', event.code, event.reason);
+      globalWebSocket = null;
+      if (event.code !== 1000) {
+        scheduleGlobalReconnect(apiBase);
+      }
+    };
+
+    globalWebSocket.onerror = (error) => {
+      console.error('WebSocket 连接错误:', error);
+    };
+  } catch (error) {
+    console.error('创建 WebSocket 连接失败:', error);
+    scheduleGlobalReconnect(apiBase);
+  }
+}
+
+function scheduleGlobalReconnect(apiBase: string) {
+  if (globalReconnectTimer) return;
+  console.log(`${reconnectDelay}ms 后尝试重连 WebSocket`);
+  globalReconnectTimer = window.setTimeout(() => {
+    globalReconnectTimer = null;
+    connectGlobalWebSocket(apiBase);
+  }, reconnectDelay);
+}
+
+function registerMessageHandler(handler: (message: string) => void) {
+  messageHandlers.push(handler);
+  console.log('注册消息处理函数，当前处理函数数量:', messageHandlers.length);
+}
+
+function unregisterMessageHandler(handler: (message: string) => void) {
+  const index = messageHandlers.indexOf(handler);
+  if (index > -1) {
+    messageHandlers.splice(index, 1);
+    console.log('取消注册消息处理函数，当前处理函数数量:', messageHandlers.length);
+  }
+}
+
+// 将函数挂载到全局，供组件使用
+(window as any).chatWebSocketManager = {
+  connectGlobalWebSocket,
+  registerMessageHandler,
+  unregisterMessageHandler
+};
+// ===== 全局 WebSocket 管理结束 =====
+</script>
+
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch, defineExpose } from 'vue';
 // import { AudioQueue ,AudioQueueOptions} from '../services/audioService1';
@@ -16,6 +116,8 @@ type TranslationConfig = {
   apiKey?: string;
   appId?: string;
 } | null;
+
+
 
 const props = withDefaults(defineProps<{
   mode?: 'compact' | 'full';
@@ -86,6 +188,65 @@ let mcpDurationTimer: number | null = null;
 
 // UI content for both modes
 const assistantBubbleText = ref('');
+
+function handlePassiveMessage(message: string) {
+  if (!message || !message.trim()) return;
+  
+  // 过滤包含 ...ignore 的消息（后端 ping 消息）
+  if (message.includes('...ignore')) {
+    console.log('收到后端 ping 消息，忽略处理:', message);
+    return;
+  }
+  
+  // 使用与主动发送消息相同的处理逻辑
+  if (props.mode === 'compact') {
+    // compact 模式：重置状态并添加新消息
+    assistantBubbleText.value = '';
+    sentences.value = [''];
+    currentIndex.value = -1;
+    playedTtsIndices.value.clear();
+    
+    // 分割消息为句子并处理
+    const seg = splitSentences(message);
+    let idx = 0;
+    for (const s of seg.completed) {
+      sentences.value[idx] = s;
+      sentences.value.push('');
+      idx++;
+    }
+    sentences.value[sentences.value.length - 1] = seg.remainder;
+    
+    // 显示第一句
+    const maxCompletedIndex = sentences.value.length - 2;
+    if (maxCompletedIndex >= 0) {
+      currentIndex.value = 0;
+      renderCurrentSentenceTypewriter();
+      // 触发 TTS
+      const first = (sentences.value[0] || '').trim();
+      if (first && !playedTtsIndices.value.has(0)) {
+        playedTtsIndices.value.add(0);
+        postTtsIfEnabled(first);
+      }
+    }
+  } else {
+    // full 模式：添加为新的助手消息
+    historyCache.value.push({ role: 'assistant', text: message.trim() });
+    
+    // 更新显示窗口
+    const currentWindow = Math.max(historyLoadedEnd.value - historyLoadedStart.value, historyPageSize);
+    historyLoadedEnd.value = historyCache.value.length;
+    historyLoadedStart.value = Math.max(0, historyLoadedEnd.value - currentWindow);
+    
+    // 触发 TTS
+    postTtsIfEnabled(message.trim());
+  }
+  
+  // 强制更新 UI 并滚动到底部
+  nextTick(() => {
+    messagesEl.value && (messagesEl.value.scrollTop = messagesEl.value.scrollHeight);
+    measureAndEmit();
+  });
+}
 
 function measureAndEmit(from: 'input' | 'content' = 'content') {
   nextTick(() => {
@@ -169,6 +330,11 @@ function splitSentences(buffer: string) {
     if (ch === '.' && buffer.slice(i, i + 3) === '...') {
       current += '...';
       i += 2;
+      // 检查省略号后是否有内容，如果有则作为句子边界
+      if (i + 1 < buffer.length && buffer[i + 1].trim()) {
+        completed.push(current);
+        current = '';
+      }
       continue;
     }
     current += ch;
@@ -603,21 +769,10 @@ function scrollToBottom() {
   });
 }
 
-function onMessagesClick(e: MouseEvent) {
+function onMessagesClick() {
   if (props.mode !== 'compact') return;
   
-  // 如果有文本被选中，不处理点击事件，允许复制
-  const selection = window.getSelection();
-  if (selection && selection.toString().length > 0) {
-    return;
-  }
-  
-  // 如果点击的是可选择的文本区域，不处理点击事件
-  const target = e.target as HTMLElement;
-  if (target.closest('.bubble') || target.closest('.mcp-details')) {
-    return;
-  }
-  
+  // compact模式下不允许文本选择，直接处理点击事件
   const maxIdx = sentences.value.length - 2;
   if (currentIndex.value < 0 && maxIdx >= 0) {
     showIndex(0);
@@ -661,6 +816,11 @@ onMounted(async () => {
   }
   autoGrowInput();
   measureAndEmit();
+  
+  // 注册消息处理函数并确保全局 WebSocket 连接
+  console.log(`AIChatPanel (${props.mode}) 组件挂载，注册消息处理函数`);
+  (window as any).chatWebSocketManager.registerMessageHandler(handlePassiveMessage);
+  (window as any).chatWebSocketManager.connectGlobalWebSocket(props.apiBase);
 });
 
 // When tail grows, keep pinned to bottom (won't trigger on top paging)
@@ -669,6 +829,10 @@ watch(() => historyLoadedEnd.value, () => { if (props.mode === 'full') scrollToB
 onBeforeUnmount(() => {
   if (typeTimer) { window.clearInterval(typeTimer); typeTimer = null; }
   if (mcpDurationTimer) { clearInterval(mcpDurationTimer); mcpDurationTimer = null; }
+  
+  // 取消注册消息处理函数（但不关闭全局 WebSocket 连接）
+  console.log(`AIChatPanel (${props.mode}) 组件销毁，取消注册消息处理函数`);
+  (window as any).chatWebSocketManager.unregisterMessageHandler(handlePassiveMessage);
 });
 
 watch(() => props.mcpEnabled, () => { /* no-op, picked up on next send */ });
@@ -789,7 +953,7 @@ function processTextEscapes(text: string): string {
 .msg.assistant.center { justify-content: center; }
 .avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; background-size: cover; background-position: center; }
 .bubble { max-width: 85%; padding: 8px 10px; border-radius: 10px; background: #fff; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 1px 3px rgba(0,0,0,0.05); white-space: pre-wrap; word-break: break-word; user-select: text; -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; }
-.bubble.compact { background: transparent; border: none; box-shadow: none; padding: 0; max-width: 90%; text-align: center; }
+.bubble.compact { background: transparent; border: none; box-shadow: none; padding: 0; max-width: 90%; text-align: center; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
 .footer { display: flex; align-items: flex-end; gap: 8px; margin-top: 8px; }
 .textarea-wrap { flex: 1; position: relative; }
 textarea { width: 100%; min-height: 20px; height: 20px; max-height: 120px; resize: none; padding: 8px 10px; line-height: 20px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.08); outline: none; background: #fff; color: #1f1f1f; overflow: auto; }
