@@ -21,7 +21,6 @@ declare global {
 }
 window.PIXI=PIXI;//为了pixi-live2d-display内部调用
 import { useAppStore } from '../stores/appStore';
-import { showNextMessage } from '../services/messageService';
 const liveCanvas=ref( null);//创建变量绑定画布
 let app // 为了存储pixi实例
 let model // 为了存储live2d实例
@@ -85,11 +84,10 @@ const loadLive2DModel=async()=>{
   console.log('模型路径',modelPath)
   // 🚫 加载模型时禁用自动交互和鼠标跟踪
   model=await Live2DModel.from(modelPath, {
-    autoInteract: false,        // 禁用自动交互
   });
   // model=await Live2DModel.from("https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json");
 
-
+  model.autoInteract=false;
 
   if(!model){
     console.error('模型加载失败')
@@ -153,6 +151,24 @@ const loadLive2DModel=async()=>{
   model.on('rightclick', () => {
     store.updateToolbar({ visible: true });
   });
+  
+  // 🎯 添加左击触发眨眼功能
+  model.on('click', () => {
+    console.log('👁️ 模型被左击，触发眨眼动作');
+    
+    // 调用眨眼动画
+    if (typeof window !== 'undefined' && (window as any).live2dAnimationControls) {
+      const success = (window as any).live2dAnimationControls.blink();
+      if (success) {
+        console.log('✅ 眨眼动画触发成功');
+      } else {
+        console.warn('⚠️ 眨眼动画触发失败');
+      }
+    } else {
+      console.warn('⚠️ Live2D动画控制器未初始化，无法触发眨眼');
+    }
+  });
+  
   // 添加拖拽功能
   // makeDraggable(model);
   
