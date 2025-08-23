@@ -12,7 +12,9 @@ export const useAppStore = defineStore('app', () => {
     reload: false,
     scale: 0.11,
     draggable: false,
-    voices: []
+    voices: [],
+    currentExpression: "",
+    availableExpressions: [] as string[]
   })
 
   // 消息框信息
@@ -40,7 +42,10 @@ export const useAppStore = defineStore('app', () => {
 
   // 更新live2d信息
   function updateLive2d(data: Partial<typeof live2d.value>) {
+    console.log('Store更新live2d数据:', data);
+    console.log('更新前live2d.value:', live2d.value);
     live2d.value = { ...live2d.value, ...data }
+    console.log('更新后live2d.value:', live2d.value);
   }
 
   // 更新配置

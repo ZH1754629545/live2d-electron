@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { playSystemAudio } from '@renderer/services/audioService';
+import { playSystemAudio } from '../services/audioService';
 import { useAppStore } from '../stores/appStore';
 import { computed, ref, shallowRef, defineAsyncComponent } from 'vue';
 
@@ -31,7 +31,7 @@ const toolItems = [
 const componentMap = {
   SettingsDialog: defineAsyncComponent(() => import('./toolItem/SettingsDialog.vue')),
   // DressupDialog: () => import('./dialogs/DressupDialog.vue'),
-  // ExpressionDialog: () => import('./dialogs/ExpressionDialog.vue'),
+  // ExpressionDialog: defineAsyncComponent(() => import('./toolItem/ExpressionDialog.vue')),
   // MotionDialog: () => import('./dialogs/MotionDialog.vue'),
   // ScreenshotDialog: () => import('./dialogs/ScreenshotDialog.vue'),
   // VolumeDialog: () => import('./dialogs/VolumeDialog.vue'),

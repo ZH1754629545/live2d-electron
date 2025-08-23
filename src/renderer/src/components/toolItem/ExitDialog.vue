@@ -10,7 +10,6 @@ const closeDialog = () => {
 const closeWin=async()=>{
     try {
     closeDialog();
-    await playSystemAudio('exit');
     await window.electron.ipcRenderer.invoke('exit-app');
   } catch (error) {
     console.error('退出应用失败:', error);
