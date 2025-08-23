@@ -37,7 +37,7 @@ function connectGlobalWebSocket(apiBase: string) {
     globalWebSocket.onmessage = (event) => {
       try {
         const message = event.data;
-        console.log('收到 WebSocket 消息:', message);
+        // console.log('收到 WebSocket 消息:', message);
         messageHandlers.forEach(handler => {
           try {
             handler(message);
@@ -189,6 +189,73 @@ let mcpDurationTimer: number | null = null;
 // UI content for both modes
 const assistantBubbleText = ref('');
 
+/**
+ * 处理表情更新数据，用于Live2D表情动画
+ * @param happyValue 开心值 (0-10)
+ * @param textContent 可选的文本内容
+ */
+function handleEmotionUpdate(happyValue: number, textContent?: string) {
+  try {
+    console.log(`😊 更新Live2D表情，开心值: ${happyValue}${textContent ? `，文本: "${textContent}"` : ''}`);
+    
+    // 🎯 调用Live2D表情控制功能
+    if (typeof window !== 'undefined' && (window as any).live2dAnimationControls) {
+      const success = (window as any).live2dAnimationControls.setExpression(happyValue);
+      if (success) {
+        console.log(`✅ Live2D表情更新成功，开心值: ${happyValue}`);
+      } else {
+        console.warn('⚠️ Live2D表情更新调用失败');
+      }
+    } else {
+      console.warn('⚠️ Live2D动画控制器未初始化，无法更新表情');
+    }
+    
+  } catch (error) {
+    console.error('❌ 表情更新处理失败:', error);
+  }
+}
+
+/**
+ * 处理音频同步数据，用于Live2D嘴部动画
+ * @param audioBuffer PCM音频数据数组（byte格式）
+ */
+function handleAudioSyncData(audioBuffer: number[]) {
+  try {
+    // 将byte数组转换为Float32Array（Live2D动画器需要的格式）
+    const samples = audioBuffer.length / 2; // 16位PCM，每2个字节一个样本
+    const floatData = new Float32Array(samples);
+    
+    for (let i = 0; i < samples; i++) {
+      const byteIndex = i * 2;
+      if (byteIndex + 1 < audioBuffer.length) {
+        // 小端序读取16位PCM数据
+        const low = audioBuffer[byteIndex] & 0xFF;
+        const high = audioBuffer[byteIndex + 1];
+        const sample = (high << 8) | low;
+        
+        // 处理符号位（16位有符号整数）
+        const signedSample = sample > 32767 ? sample - 65536 : sample;
+        
+        // 归一化到 [-1.0, 1.0] 范围
+        floatData[i] = signedSample / 32768.0;
+      }
+    }
+    
+    // 🎯 调用Live2D嘴部同步功能
+    if (typeof window !== 'undefined' && (window as any).live2dAnimationControls) {
+      const success = (window as any).live2dAnimationControls.updateMouthSync(floatData);
+      if (!success) {
+        console.warn('⚠️ Live2D嘴部同步调用失败');
+      }
+    } else {
+      console.warn('⚠️ Live2D动画控制器未初始化，无法进行嘴部同步');
+    }
+    
+  } catch (error) {
+    console.error('❌ 音频同步数据处理失败:', error);
+  }
+}
+
 function handlePassiveMessage(message: string) {
   if (!message || !message.trim()) return;
   
@@ -198,6 +265,51 @@ function handlePassiveMessage(message: string) {
     return;
   }
   
+  // 🎯 检测特殊消息类型（音频数据、表情控制等）
+  try {
+    const parsedMessage = JSON.parse(message);
+    
+    // 处理音频数据消息
+    if (parsedMessage && parsedMessage.audioBuffer && Array.isArray(parsedMessage.audioBuffer)) {
+      console.log('🎤 收到音频同步数据，长度:', parsedMessage.audioBuffer.length);
+      handleAudioSyncData(parsedMessage.audioBuffer);
+      return; // 不处理为普通消息，直接返回
+    }
+    
+    // 处理表情控制消息
+    if (parsedMessage && typeof parsedMessage.happy === 'number') {
+      console.log('😊 收到表情控制消息，开心值:', parsedMessage.happy);
+      handleEmotionUpdate(parsedMessage.happy, parsedMessage.text);
+      
+      // 如果没有文本内容，直接返回（不显示在对话框中）
+      if (!parsedMessage.text || !parsedMessage.text.trim()) {
+        return;
+      }
+      
+      // 如果有文本内容，使用文本内容继续处理
+      message = parsedMessage.text.trim();
+    }
+    
+  } catch (e) {
+    // 如果不是JSON格式，继续按文本消息处理
+  }
+  
+  // 🎯 检测文本中的表情标记（备用方案）
+  const happyMatch = message.match(/happy:\s*(\d+(?:\.\d+)?)/i);
+  if (happyMatch) {
+    const happyValue = parseFloat(happyMatch[1]);
+    console.log('😊 从文本中检测到表情控制，开心值:', happyValue);
+    handleEmotionUpdate(happyValue);
+    
+    // 移除表情标记，保留其他文本
+    message = message.replace(/happy:\s*\d+(?:\.\d+)?/gi, '').trim();
+    
+    // 如果移除表情标记后没有文本，直接返回
+    if (!message) {
+      return;
+    }
+  }
+  
   // 使用与主动发送消息相同的处理逻辑
   if (props.mode === 'compact') {
     // compact 模式：重置状态并添加新消息
@@ -205,9 +317,10 @@ function handlePassiveMessage(message: string) {
     sentences.value = [''];
     currentIndex.value = -1;
     playedTtsIndices.value.clear();
-    
+    console.log('message',message)
     // 分割消息为句子并处理
     const seg = splitSentences(message);
+    console.log('seg',seg)
     let idx = 0;
     for (const s of seg.completed) {
       sentences.value[idx] = s;
